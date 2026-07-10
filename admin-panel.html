@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка — Yae Shop</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { padding: 0; }
+        .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 30px 20px 60px; position: relative; z-index: 5; }
+        .admin-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; flex-wrap: wrap; gap: 12px; }
+        .admin-top h1 { margin: 0; font-size: 26px; background: linear-gradient(90deg, #fff, #ff7eb3); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .a-btn { background: linear-gradient(90deg,#ff4dff,#b300b3); color:#fff; border:none; padding:10px 18px; border-radius:10px; font-weight:bold; cursor:pointer; transition:0.25s; }
+        .a-btn:hover { transform: translateY(-2px); box-shadow:0 6px 18px rgba(179,0,179,0.4); }
+        .a-btn.ghost { background:transparent; border:1px solid #ff7eb3; color:#ff7eb3; }
+
+        /* Гейт */
+        .gate { max-width: 380px; margin: 12vh auto 0; background: linear-gradient(145deg,#1e1926,#15111c); border:1px solid #3a2b4d; border-radius:18px; padding:30px; text-align:center; position:relative; z-index:5; }
+        .gate h2 { margin:0 0 6px; color:#fff; }
+        .gate p { color:#a097b0; font-size:13px; margin:0 0 18px; }
+        .gate input { width:100%; box-sizing:border-box; padding:12px 14px; background:#1c1626; border:1.5px solid #4a3b5d; border-radius:10px; color:#fff; -webkit-text-fill-color:#fff; font-size:14px; outline:none; margin-bottom:12px; }
+        .gate input:focus { border-color:#ff7eb3; }
+        .gate-msg { color:#ff4d4d; font-size:13px; min-height:18px; margin-top:8px; }
+
+        .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:26px; }
+        .card { background:linear-gradient(145deg,#1e1926,#15111c); border:1px solid #3a2b4d; border-radius:16px; padding:20px; }
+        .card .v { font-size:28px; font-weight:bold; color:#ff7eb3; text-shadow:0 0 12px rgba(255,126,179,0.35); }
+        .card .l { color:#a097b0; font-size:13px; margin-top:4px; }
+        .card.hl { border-color:#4dff88; box-shadow:0 0 20px rgba(77,255,136,0.18); }
+        .card.hl .v { color:#4dff88; text-shadow:0 0 14px rgba(77,255,136,0.4); }
+
+        .panel { background:linear-gradient(145deg,#1e1926,#15111c); border:1px solid #3a2b4d; border-radius:16px; padding:22px; margin-bottom:22px; }
+        .panel h3 { margin:0 0 16px; color:#fff; font-size:17px; }
+
+        .bar-row { margin-bottom:12px; }
+        .bar-row .top { display:flex; justify-content:space-between; font-size:13px; color:#d8c3e0; margin-bottom:5px; }
+        .bar-row .top b { color:#ff7eb3; }
+        .bar-track { height:10px; background:#15101d; border:1px solid #3a2b4d; border-radius:6px; overflow:hidden; }
+        .bar-fill { height:100%; background:linear-gradient(90deg,#ff7eb3,#ff4dff); border-radius:6px; transition:width 0.6s ease; }
+
+        .chips { display:flex; flex-wrap:wrap; gap:10px; }
+        .chip { background:#15101d; border:1px solid #3a2b4d; border-radius:10px; padding:8px 14px; font-size:13px; color:#d8c3e0; }
+        .chip b { color:#ff7eb3; }
+
+        table.orders { width:100%; border-collapse:collapse; font-size:13px; }
+        table.orders th { text-align:left; color:#a097b0; font-weight:bold; padding:8px 10px; border-bottom:1px solid #3a2b4d; }
+        table.orders td { padding:9px 10px; border-bottom:1px solid #221a2e; color:#d8c3e0; }
+        table.orders tr:hover td { background:rgba(255,126,179,0.05); }
+        .st { padding:3px 9px; border-radius:20px; font-size:11px; font-weight:bold; white-space:nowrap; }
+        .st.ok { background:rgba(77,255,136,0.15); color:#4dff88; }
+        .st.wait { background:rgba(255,204,0,0.15); color:#ffcc00; }
+        .st.err { background:rgba(255,77,77,0.15); color:#ff4d4d; }
+        .table-scroll { overflow-x:auto; }
+        @media (max-width:560px){ .admin-top h1 { font-size:21px; } }
+    </style>
+</head>
+<body>
+    <div id="sakura-tree"></div>
+
+    <!-- Гейт ввода ключа -->
+    <div id="gate" class="gate" style="display:none;">
+        <h2>🔒 Админка</h2>
+        <p>Введите секретный ключ (ADMIN_SECRET_KEY)</p>
+        <input id="key-input" type="password" placeholder="Секретный ключ" onkeydown="if(event.key==='Enter')login()">
+        <button class="a-btn" style="width:100%;" onclick="login()">Войти</button>
+        <div id="gate-msg" class="gate-msg"></div>
+    </div>
+
+    <!-- Дашборд -->
+    <div id="dash" class="admin-wrap" style="display:none;">
+        <div class="admin-top">
+            <h1>📊 Панель управления</h1>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="a-btn" onclick="syncPrices(this)">⟳ Синхронизировать цены</button>
+                <button class="a-btn ghost" onclick="loadStats()">↻ Обновить</button>
+                <button class="a-btn ghost" onclick="logoutAdmin()">Выйти</button>
+            </div>
+        </div>
+
+        <div id="cost-warn" style="display:none; background:rgba(255,204,0,0.1); border:1px solid #ffcc00; color:#ffcc00; border-radius:12px; padding:12px 16px; margin-bottom:18px; font-size:13px;">⚠️ Себестоимость ещё не загружена — нажми «⟳ Синхронизировать цены», чтобы прибыль считалась.</div>
+        <div class="cards" id="cards"></div>
+
+        <div class="panel">
+            <h3>🎮 По играм (выручка)</h3>
+            <div id="by-game"></div>
+        </div>
+
+        <div class="panel">
+            <h3>🏷️ Статусы заказов</h3>
+            <div class="chips" id="by-status"></div>
+        </div>
+
+        <div class="panel">
+            <h3>🧾 Последние заказы</h3>
+            <div class="table-scroll">
+                <table class="orders">
+                    <thead><tr><th>#</th><th>Игра</th><th>Метод</th><th>UID</th><th>Сумма</th><th>Статус</th></tr></thead>
+                    <tbody id="recent"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getKey() { return localStorage.getItem('admin_key') || ''; }
+        function fmt(n) { return Number(n).toLocaleString('ru-RU'); }
+
+        function statusClass(s) {
+            if (!s) return '';
+            if (s.includes('Оплачен') || s.includes('Выполнен')) return 'ok';
+            if (s.includes('Ошибка') || s.includes('Отмен')) return 'err';
+            return 'wait';
+        }
+
+        async function loadStats() {
+            const key = getKey();
+            if (!key) { showGate(); return; }
+            try {
+                const res = await fetch('/api/admin/stats?key=' + encodeURIComponent(key));
+                if (res.status === 403) { localStorage.removeItem('admin_key'); showGate('Неверный ключ'); return; }
+                const d = await res.json();
+                render(d);
+            } catch (e) { showGate('Ошибка соединения'); }
+        }
+
+        function render(d) {
+            document.getElementById('gate').style.display = 'none';
+            document.getElementById('dash').style.display = 'block';
+
+            document.getElementById('cost-warn').style.display = d.has_costs ? 'none' : 'block';
+
+            document.getElementById('cards').innerHTML = `
+                <div class="card hl"><div class="v">${fmt(d.profit)} ₽</div><div class="l">💰 Прибыль (доход)</div></div>
+                <div class="card"><div class="v">${fmt(d.revenue)} ₽</div><div class="l">Оборот (выручка)</div></div>
+                <div class="card"><div class="v">${fmt(d.cost)} ₽</div><div class="l">Себестоимость</div></div>
+                <div class="card"><div class="v">${fmt(d.success_orders)}</div><div class="l">Успешных заказов</div></div>
+                <div class="card"><div class="v">${fmt(d.avg_check)} ₽</div><div class="l">Средний чек</div></div>
+                <div class="card"><div class="v">${fmt(d.total_orders)}</div><div class="l">Всего заказов</div></div>
+                <div class="card"><div class="v">${fmt(d.email_users)}</div><div class="l">Email-аккаунтов</div></div>`;
+
+            const maxRev = Math.max(1, ...d.by_game.map(g => g.rev));
+            document.getElementById('by-game').innerHTML = d.by_game.length ? d.by_game.map(g => `
+                <div class="bar-row">
+                    <div class="top"><span>${g.game} <span style="color:#7c7090;">(${g.cnt})</span></span><b>${fmt(g.profit)} ₽ <span style="color:#7c7090;font-weight:normal;">прибыль / ${fmt(g.rev)} оборот</span></b></div>
+                    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(g.rev / maxRev * 100)}%"></div></div>
+                </div>`).join('') : '<div style="color:#a097b0;">Пока нет данных.</div>';
+
+            document.getElementById('by-status').innerHTML = d.by_status.length ? d.by_status.map(s =>
+                `<div class="chip">${s.status || '—'}: <b>${s.cnt}</b></div>`).join('') : '<div style="color:#a097b0;">—</div>';
+
+            document.getElementById('recent').innerHTML = d.recent.length ? d.recent.map(o => `
+                <tr>
+                    <td>#${o.id}</td>
+                    <td>${o.game || '—'}</td>
+                    <td>${o.method === 'uid' ? 'UID' : 'Вход'}</td>
+                    <td>${o.uid || '—'}</td>
+                    <td><b style="color:#ff7eb3;">${fmt(o.total_price)} ₽</b></td>
+                    <td><span class="st ${statusClass(o.status)}">${o.status || '—'}</span></td>
+                </tr>`).join('') : '<tr><td colspan="6" style="color:#a097b0; text-align:center; padding:20px;">Заказов пока нет.</td></tr>';
+        }
+
+        function showGate(msg) {
+            document.getElementById('dash').style.display = 'none';
+            document.getElementById('gate').style.display = 'block';
+            document.getElementById('gate-msg').innerText = msg || '';
+        }
+
+        function login() {
+            const k = document.getElementById('key-input').value.trim();
+            if (!k) { document.getElementById('gate-msg').innerText = 'Введите ключ'; return; }
+            localStorage.setItem('admin_key', k);
+            document.getElementById('gate-msg').innerText = '';
+            loadStats();
+        }
+
+        function logoutAdmin() { localStorage.removeItem('admin_key'); showGate(); }
+
+        async function syncPrices(btn) {
+            const key = getKey();
+            if (!key) { showGate(); return; }
+            const t = btn.innerText; btn.innerText = 'Синхронизация ⏳...'; btn.disabled = true;
+            try {
+                const res = await fetch('/api/admin/sync', { method: 'POST', headers: { 'X-Admin-Key': key } });
+                const d = await res.json().catch(() => ({}));
+                if (res.ok) { alert('✅ ' + (d.message || 'Цены обновлены')); loadStats(); }
+                else { alert('Ошибка: ' + (d.detail || 'не удалось синхронизировать')); }
+            } catch (e) { alert('Ошибка соединения'); }
+            btn.innerText = t; btn.disabled = false;
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>

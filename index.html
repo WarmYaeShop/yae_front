@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff7eb3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Yae Shop">
+    <link rel="apple-touch-icon" href="images/Genshin_Impact.webp">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta name="description" content="Yae Shop — быстрый и недорогой донат в Genshin Impact, Honkai: Star Rail, Wuthering Waves, Zenless Zone Zero. Пополнение по UID и по входу, бонусы и акции 🌸">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Yae Shop">
+    <meta property="og:title" content="Yae Shop — дешёвый донат в игры">
+    <meta property="og:description" content="Пополнение Genshin, HSR, WuWa, ZZZ по выгодным ценам. Быстро, безопасно, с бонусами и акциями 🌸">
+    <meta property="og:image" content="https://yaeshop.net/images/banner_main.webp">
+    <meta property="og:url" content="https://yaeshop.net/">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Yae Shop — Донат от Яэ Мико</title>
+    <link href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* --- ГЛАВНАЯ СТРАНИЦА --- */
+        main { max-width: 1200px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 5; }
+        .main-title { text-align: center; font-size: 48px; background: linear-gradient(90deg, #fff, #ff7eb3); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+        
+        .trust-badges { display: flex; justify-content: center; gap: 15px; margin-bottom: 60px; flex-wrap: wrap; }
+        .badge { background: rgba(30, 25, 38, 0.8); border: 1px solid #ff7eb3; padding: 10px 20px; border-radius: 25px; font-size: 15px; color: #fff; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 15px rgba(255, 126, 179, 0.2); }
+
+        /* ИДЕАЛЬНОЕ ЦЕНТРИРОВАНИЕ КАРТОЧЕК ИГР */
+        .game-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; }
+        .game-card { width: 220px; background: rgba(30, 25, 38, 0.6); border: 1px solid #3a2b4d; border-radius: 20px; padding: 15px; text-align: center; transition: 0.3s; cursor: pointer; }
+        .game-card:hover { transform: translateY(-10px); border-color: #ff7eb3; box-shadow: 0 0 20px rgba(255, 126, 179, 0.4); }
+        .game-icon-container { width: 100%; aspect-ratio: 1 / 1; border-radius: 15px; overflow: hidden; margin-bottom: 15px; border: 1px solid #4a3b5d; }
+        .game-icon-container img { width: 100%; height: 100%; object-fit: cover; }
+        .game-name { font-weight: bold; font-size: 16px; color: #ffffff; }
+
+        /* ИДЕАЛЬНЫЙ ЦЕНТРИРОВАННЫЙ FAQ С ПЛАВНОЙ АНИМАЦИЕЙ */
+        .faq-section { max-width: 800px; margin: 80px auto 0; }
+        .section-title { font-size: 20px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; color: #fff; margin-bottom: 40px; }
+        .faq-item { background: linear-gradient(145deg, #1e1926, #15111c); border: 1px solid #3a2b4d; border-radius: 15px; margin-bottom: 15px; overflow: hidden; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); cursor: pointer; }
+        .faq-item:hover { border-color: #ff7eb3; box-shadow: 0 5px 20px rgba(255, 126, 179, 0.2); }
+        .faq-question { padding: 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 17px; }
+        
+        .faq-icon { transition: transform 0.4s ease; color: #ff7eb3; }
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+
+        .faq-answer-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s ease-out; }
+        .faq-item.active .faq-answer-wrapper { grid-template-rows: 1fr; }
+        .faq-answer { overflow: hidden; }
+        .faq-answer-inner { padding: 0 20px 20px; color: #a097b0; line-height: 1.6; font-size: 15px; }
+
+        footer { margin-top: 100px; padding: 40px 20px; background: rgba(13, 10, 20, 0.8); border-top: 1px solid #3a2b4d; text-align: center; position: relative; z-index: 5; }
+        .footer-logo { font-family: 'Marck Script', cursive; font-size: 28px; color: #ff7eb3; margin-bottom: 10px; }
+        .footer-text { color: #a097b0; font-size: 14px; max-width: 600px; margin: 0 auto 20px; line-height: 1.6; }
+        .footer-copy { color: #fff; font-size: 13px; font-weight: bold; }
+
+        /* --- БАННЕР-КАРУСЕЛЬ --- */
+        .hero-carousel { position: relative; max-width: 1000px; margin: 0 auto 45px; border-radius: 24px; overflow: hidden; box-shadow: 0 12px 45px rgba(0,0,0,0.45); border: 1px solid #3a2b4d; }
+        .hero-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .hero-slide { min-width: 100%; height: 320px; background-size: cover; background-position: right center; position: relative; display: flex; align-items: center; }
+        .hero-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(13,10,20,0.95) 0%, rgba(13,10,20,0.75) 40%, rgba(13,10,20,0.15) 100%); }
+        .hero-content { position: relative; z-index: 2; padding: 0 55px; max-width: 55%; }
+        .hero-content h2 { font-size: 38px; margin: 0 0 14px; background: linear-gradient(90deg, #fff, #ff7eb3); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-content p { color: #d8c3e0; font-size: 16px; margin: 0 0 26px; line-height: 1.5; max-width: 400px; }
+        .hero-btn { background: linear-gradient(90deg, #ff4dff, #b300b3); color: #fff; border: none; padding: 12px 28px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,77,255,0.3); }
+        .hero-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(255,77,255,0.5); }
+        .hero-arrow { position: absolute; bottom: 13px; z-index: 4; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,126,179,0.4); color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .hero-arrow:hover { background: #ff7eb3; box-shadow: 0 0 15px rgba(255,126,179,0.5); }
+        .hero-arrow.left { right: 58px; }
+        .hero-arrow.right { right: 14px; }
+        .hero-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 4; display: flex; gap: 8px; }
+        .hero-dots span { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: 0.3s; }
+        .hero-dots span.active { background: #ff7eb3; width: 26px; border-radius: 5px; }
+        .hero-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,0.12); z-index: 4; }
+        .hero-progress-bar { height: 100%; width: 0; background: linear-gradient(90deg, #ff7eb3, #ff4dff); box-shadow: 0 0 10px rgba(255,126,179,0.6); }
+        @media (max-width: 700px) {
+            .hero-slide { height: 220px; }
+            .hero-content { max-width: 85%; padding: 0 25px; }
+            .hero-content h2 { font-size: 26px; }
+            .hero-content p { font-size: 14px; margin-bottom: 16px; }
+        }
+    </style>
+    <script src="components.js"></script>
+</head>
+<body>
+
+    <script>renderHeader();</script>
+
+    <main>
+        <div class="hero-carousel" id="heroCarousel">
+            <div class="hero-track" id="heroTrack">
+                <div class="hero-slide" style="background-color:#3a1d5c; background-image:url('images/banner_main.webp');">
+                    <div class="hero-content">
+                        <h2>Donate by Yae Miko</h2>
+                        <p>Дёшево, быстро и безопасно — донат в любимые игры с сохранением всех бонусов</p>
+                        <button class="hero-btn" onclick="document.querySelector('.game-grid').scrollIntoView({behavior:'smooth', block:'center'})">Выбрать игру →</button>
+                    </div>
+                </div>
+                <div class="hero-slide" style="background-color:#1d3a5c; background-image:url('images/banner_genshin.webp');">
+                    <div class="hero-content">
+                        <h2>Genshin Impact</h2>
+                        <p>Кристаллы, Луна и Боевой пропуск по лучшим ценам</p>
+                        <button class="hero-btn" onclick="goToPage('genshin.html')">Перейти →</button>
+                    </div>
+                </div>
+                <div class="hero-slide" style="background-color:#1d5c4a; background-image:url('images/banner_hsr.webp');">
+                    <div class="hero-content">
+                        <h2>Honkai: Star Rail</h2>
+                        <p>Звёздный нефрит и пропуски снабжения — быстро и безопасно</p>
+                        <button class="hero-btn" onclick="goToPage('hsr.html')">Перейти →</button>
+                    </div>
+                </div>
+                <div class="hero-slide" style="background-color:#2a3d1d; background-image:url('images/banner_wuwa.webp');">
+                    <div class="hero-content">
+                        <h2>Wuthering Waves</h2>
+                        <p>Луниты и бандлы — пополнение по выгодным ценам</p>
+                        <button class="hero-btn" onclick="goToPage('wuwa.html')">Перейти →</button>
+                    </div>
+                </div>
+                <div class="hero-slide" style="background-color:#5c1d3a; background-image:url('images/banner_zzz.webp');">
+                    <div class="hero-content">
+                        <h2>Zenless Zone Zero</h2>
+                        <p>Монохромы и подписки — мгновенная доставка по UID</p>
+                        <button class="hero-btn" onclick="goToPage('zzz.html')">Перейти →</button>
+                    </div>
+                </div>
+            </div>
+            <button class="hero-arrow left" onclick="heroMove(-1)">‹</button>
+            <button class="hero-arrow right" onclick="heroMove(1)">›</button>
+            <div class="hero-dots" id="heroDots"></div>
+            <div class="hero-progress"><div class="hero-progress-bar" id="heroProgress"></div></div>
+        </div>
+
+        <h1 class="main-title" id="hero-title">Дешёвый донат в игры</h1>
+        <div class="trust-badges" id="trust-badges">
+            <div class="badge">👑 5 лет на рынке</div>
+            <div class="badge">💗 1500+ отзывов</div>
+            <div class="badge">🚀 Быстрая доставка</div>
+        </div>
+
+        <div class="game-grid">
+            <div class="game-card" onclick="goToPage('genshin.html')">
+                <div class="game-icon-container"><img src="images/Genshin_Impact.webp" alt="Genshin"></div>
+                <div class="game-name">Genshin Impact</div>
+            </div>
+            <div class="game-card" onclick="goToPage('hsr.html')">
+                <div class="game-icon-container"><img src="images/hsr.webp" alt="HSR"></div>
+                <div class="game-name">Honkai: Star Rail</div>
+            </div>
+            <div class="game-card" onclick="goToPage('wuwa.html')">
+                <div class="game-icon-container"><img src="images/wuwa.webp" alt="WuWa"></div>
+                <div class="game-name">Wuthering Waves</div>
+            </div>
+            <div class="game-card" onclick="goToPage('zzz.html')">
+                <div class="game-icon-container"><img src="images/zzz.png" alt="ZZZ"></div>
+                <div class="game-name">ZZZ</div>
+            </div>
+        </div>
+
+        <div class="stats-bar" style="justify-content: center;">
+            <div class="stat-cell" style="flex: 0 1 340px;"><div class="stat-num" id="stat-orders">5000+</div><div class="stat-lbl">заказов выполнено</div></div>
+        </div>
+
+        <div class="how-section">
+            <div class="section-title">Как это работает 🌸</div>
+            <div class="how-grid">
+                <div class="how-card">
+                    <div class="how-num">1</div>
+                    <div class="how-ic">🎮</div>
+                    <h3>Выберите игру и товар</h3>
+                    <p>Откройте нужную игру, выберите метод пополнения (по UID или по входу) и добавьте товары в корзину.</p>
+                </div>
+                <div class="how-card">
+                    <div class="how-num">2</div>
+                    <div class="how-ic">💳</div>
+                    <h3>Оплатите удобно</h3>
+                    <p>Укажите UID или данные входа и оплатите безопасным способом. Скидки, бонусы и статус применятся автоматически.</p>
+                </div>
+                <div class="how-card">
+                    <div class="how-num">3</div>
+                    <div class="how-ic">🚀</div>
+                    <h3>Получите донат</h3>
+                    <p>По UID — мгновенно, по входу — 15–30 минут. Всё как в самой игре: ×2 на первое пополнение и акции.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-section">
+            <div class="section-title">Вопросы и ответы (FAQ) 🌸</div>
+            <div id="faq-list"></div>
+        </div>
+    </main>
+
+    <script>renderFooter();</script>
+
+    <script src="main.js"></script>
+    <script>
+        // --- Карусель-баннер ---
+        (function () {
+            const track = document.getElementById('heroTrack');
+            if (!track) return;
+            const total = track.children.length;
+            const dotsBox = document.getElementById('heroDots');
+            const prog = document.getElementById('heroProgress');
+            const DURATION = 7000;
+            let idx = 0, timer;
+
+            for (let i = 0; i < total; i++) {
+                const d = document.createElement('span');
+                if (i === 0) d.classList.add('active');
+                d.onclick = () => { idx = i; render(); reset(); };
+                dotsBox.appendChild(d);
+            }
+            function startProgress() {
+                if (!prog) return;
+                prog.style.transition = 'none';
+                prog.style.width = '0%';
+                void prog.offsetWidth; // перезапуск анимации
+                prog.style.transition = 'width ' + DURATION + 'ms linear';
+                prog.style.width = '100%';
+            }
+            function render() {
+                track.style.transform = `translateX(-${idx * 100}%)`;
+                [...dotsBox.children].forEach((d, i) => d.classList.toggle('active', i === idx));
+                startProgress();
+            }
+            window.heroMove = (dir) => { idx = (idx + dir + total) % total; render(); reset(); };
+            function reset() { clearInterval(timer); timer = setInterval(() => window.heroMove(1), DURATION); }
+            render(); reset();
+        })();
+
+        // --- Живые счётчики ---
+        (async function () {
+            try {
+                const s = await (await fetch('/api/stats')).json();
+                const oEl = document.getElementById('stat-orders');
+                const target = s.orders;
+                let cur = Math.max(0, target - 60);
+                const step = () => {
+                    cur += Math.ceil((target - cur) / 8);
+                    if (cur >= target) cur = target;
+                    oEl.innerText = cur.toLocaleString('ru-RU') + '+';
+                    if (cur < target) requestAnimationFrame(step);
+                };
+                step();
+            } catch (e) {}
+        })();
+
+    </script>
+</body>
+</html>

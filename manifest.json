@@ -1,0 +1,15 @@
+{
+  "name": "Yae Shop — донат в игры",
+  "short_name": "Yae Shop",
+  "description": "Пополнение игровых балансов: Genshin Impact, Honkai Star Rail, Wuthering Waves, Zenless Zone Zero.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f0c14",
+  "theme_color": "#ff7eb3",
+  "icons": [
+    { "src": "images/Genshin_Impact.webp", "sizes": "192x192", "type": "image/webp", "purpose": "any" },
+    { "src": "images/Genshin_Impact.webp", "sizes": "512x512", "type": "image/webp", "purpose": "any maskable" }
+  ]
+}

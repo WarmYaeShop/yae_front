@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ Панель - Yae Shop</title>
+    <style>
+        body { font-family: sans-serif; background: #120f18; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .admin-panel { background: #1e1926; padding: 40px; border-radius: 20px; border: 1px solid #ff7eb3; text-align: center; }
+        .sync-btn { background: #ff7eb3; color: white; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 10px; cursor: pointer; transition: 0.3s; margin-top: 20px; }
+        .sync-btn:hover { background: #ff4dff; box-shadow: 0 0 15px #ff7eb3; }
+        #status { margin-top: 20px; color: #4dff88; }
+    </style>
+</head>
+<body>
+    <div class="admin-panel">
+        <h2>🛠️ Панель управления Yae Shop</h2>
+        <p>Синхронизация цен с Google Таблицей</p>
+        <button class="sync-btn" onclick="syncPrices()">Синхронизировать цены</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const ADMIN_KEY = '42053569856798623560548214854695895080208051830864';
+
+        async function syncPrices() {
+            const statusEl = document.getElementById('status');
+            statusEl.style.color = 'white';
+            statusEl.innerText = 'Синхронизация... Пожалуйста, подождите.';
+
+            try {
+                const response = await fetch('/api/admin/sync', {
+                    method: 'POST',
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusEl.style.color = '#4dff88';
+                    statusEl.innerText = '✅ ' + data.message;
+                } else {
+                    statusEl.style.color = '#ff4d4d';
+                    statusEl.innerText = '❌ Ошибка: ' + data.detail;
+                }
+            } catch (error) {
+                statusEl.style.color = '#ff4d4d';
+                statusEl.innerText = '❌ Ошибка подключения. Сервер запущен?';
+            }
+        }
+    </script>
+</body>
+</html>

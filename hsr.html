@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <meta name="description" content="Донат в Honkai: Star Rail — Звёздно-нефритовые билеты, БП, пропуск снабжения. Быстро на Yae Shop.">
+    <title>Honkai: Star Rail — Yae Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="components.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="game-styles.css">
+    <style>
+        /* --- СТИЛИ ДЛЯ КОРЗИНЫ И ТОВАРОВ --- */
+        main { max-width: 1200px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 5; display: flex; align-items: flex-start; gap: 30px; }
+        .content-left { flex: 1; min-width: 0; }
+        .cart-right { width: 350px; position: sticky; top: 100px; background: rgba(30, 25, 38, 0.8); border: 1px solid #ff7eb3; border-radius: 20px; padding: 25px; box-shadow: 0 0 30px rgba(255, 126, 179, 0.15); backdrop-filter: blur(10px); max-height: calc(100vh - 120px); overflow-y: auto; box-sizing: border-box; }
+        .cart-right::-webkit-scrollbar { width: 4px; } .cart-right::-webkit-scrollbar-thumb { background: #ff7eb3; border-radius: 5px; }
+        @media (max-width: 950px) { main { flex-direction: column; } .cart-right { width: 100%; position: static; max-height: none; order: -1; margin-bottom: 20px; } }
+
+        .game-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; background: rgba(30, 25, 38, 0.6); padding: 20px; border-radius: 20px; border: 1px solid #3a2b4d; }
+        .game-header img { width: 90px; height: 90px; border-radius: 20px; object-fit: cover; box-shadow: 0 0 20px rgba(255, 126, 179, 0.2); }
+        .game-header h1 { margin: 0; font-size: 32px; background: linear-gradient(90deg, #fff, #ff7eb3); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .method-switch { position: relative; display: flex; background: rgba(20, 15, 25, 0.8); border-radius: 15px; padding: 5px; margin-bottom: 30px; border: 1px solid #3a2b4d; }
+        .method-switch-slider { position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc(50% - 5px); background: linear-gradient(90deg, #ff4dff, #b300b3); border-radius: 10px; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 1; box-shadow: 0 0 15px rgba(255, 126, 179, 0.5); }
+        .method-switch.uid-active .method-switch-slider { transform: translateX(100%); }
+        .method-btn { flex: 1; padding: 15px; text-align: center; background: transparent; border: none; color: #d8c3e0; font-size: 16px; font-weight: bold; cursor: pointer; z-index: 2; transition: color 0.3s; }
+        .method-btn.active { color: white; }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .product-card { background: linear-gradient(145deg, #1e1926, #15111c); border: 1px solid #3a2b4d; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; transition: all 0.3s; cursor: pointer; box-sizing: border-box; height: 100%; }
+        .product-card:hover { transform: translateY(-5px); border-color: #ff7eb3; box-shadow: 0 10px 20px rgba(255, 126, 179, 0.3); }
+        .product-icon { font-size: 45px; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2)); }
+        .product-name { font-weight: bold; font-size: 14px; color: #ffffff; margin-bottom: 15px; line-height: 1.3; }
+        .product-info-bottom { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .product-price { font-size: 20px; font-weight: bold; color: #ff7eb3; margin-bottom: 15px; text-shadow: 0 0 10px rgba(255, 126, 179, 0.4); }
+
+        .card-controls { display: flex; gap: 8px; width: 100%; }
+        .minus-btn { width: 44px; background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3; border-radius: 12px; font-weight: bold; font-size: 24px; cursor: pointer; transition: 0.3s; display: none; align-items: center; justify-content: center; padding: 0; }
+        .minus-btn:hover { background: #ff7eb3; color: white; box-shadow: 0 0 15px rgba(255, 126, 179, 0.4); }
+        .buy-btn { flex: 1; padding: 10px; background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .product-card:hover .buy-btn:not(.active-btn) { background: rgba(255, 126, 179, 0.2); }
+        .buy-btn.active-btn { background: #ff7eb3 !important; color: white !important; box-shadow: 0 0 15px rgba(255, 126, 179, 0.4); }
+        .buy-btn.active-btn:hover { background: #ff4dff !important; }
+
+        .checkout-step { display: none; animation: fadeIn 0.3s ease; } .checkout-step.active { display: block; }
+        .back-step-btn { background: transparent; border: none; color: #d8c3e0; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; transition: 0.3s; } .back-step-btn:hover { color: #ff7eb3; }
+
+        .cart-header { font-size: 22px; font-weight: bold; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+        .cart-header.catch-bounce { animation: catchPulse 0.3s ease-out; }
+        @keyframes catchPulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); color: #ff7eb3; text-shadow: 0 0 15px rgba(255, 126, 179, 1); } 100% { transform: scale(1); } }
+        
+        .cart-items { max-height: 350px; overflow-y: auto; margin-bottom: 20px; padding-right: 5px; }
+        .cart-item { background: #120f18; border: 1px solid #3a2b4d; border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .cart-item-info { flex: 1; margin-right: 10px; } .cart-item-name { font-size: 13px; font-weight: bold; margin-bottom: 5px; line-height: 1.2; } .cart-item-price { color: #ff7eb3; font-size: 14px; font-weight: bold; }
+        .cart-item-controls { display: flex; align-items: center; gap: 8px; background: rgba(30, 25, 38, 0.8); padding: 5px; border-radius: 8px; }
+        .qty-btn { background: transparent; border: none; color: white; font-size: 16px; cursor: pointer; padding: 0 5px; } .qty-btn:hover { color: #ff7eb3; } .qty-text { font-size: 14px; font-weight: bold; width: 15px; text-align: center; }
+
+        .cart-summary { border-top: 1px solid #3a2b4d; padding-top: 15px; margin-bottom: 20px; }
+        .total-row { display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; color: white; margin-bottom: 10px; } .total-amount { color: #ff7eb3; text-shadow: 0 0 10px rgba(255, 126, 179, 0.5); }
+        .checkout-btn { width: 100%; padding: 15px; background: linear-gradient(90deg, #ff4dff, #b300b3); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(255, 77, 255, 0.3); }
+        .checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 77, 255, 0.5); } .checkout-btn:disabled { background: #4a3b5d; color: #a097b0; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        .section-label { font-size: 16px; margin-top: 10px; margin-bottom: 10px; color: #ff7eb3; font-weight: bold; }
+        .input-group { background: rgba(30, 25, 38, 0.6); padding: 15px; border-radius: 15px; border: 1px solid #3a2b4d; margin-bottom: 15px; }
+        .input-row { display: flex; flex-direction: column; gap: 10px; } 
+        .input-field { display: flex; flex-direction: column; gap: 6px; } .input-field label { color: #d8c3e0; font-weight: bold; font-size: 12px; }
+        .input-field input, .input-field select { padding: 10px; background: #120f18; border: 1px solid #4a3b5d; border-radius: 8px; color: white; font-size: 14px; outline: none; transition: 0.3s; width: 100%; box-sizing: border-box; }
+        .input-field input:focus, .input-field select:focus { border-color: #ff7eb3; box-shadow: 0 0 10px rgba(255, 126, 179, 0.3); }
+
+        .contact-switch { position: relative; display: flex; background: rgba(20, 15, 25, 0.8); border-radius: 10px; padding: 4px; margin-bottom: 10px; border: 1px solid #3a2b4d; }
+        .contact-switch-slider { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); background: #4a3b5d; border-radius: 6px; transition: transform 0.3s; z-index: 1; }
+        .contact-switch.vk-active .contact-switch-slider { transform: translateX(100%); }
+        .contact-btn { flex: 1; padding: 6px 0; background: transparent; border: none; color: #d8c3e0; font-size: 12px; cursor: pointer; z-index: 2; transition: 0.3s; position: relative; } .contact-btn.active { color: white; font-weight: bold; }
+
+        .warning-text { font-size: 11px; margin-top: 5px; line-height: 1.3; color: #ff4d4d; }
+        .success-text { font-size: 12px; color: #4dff88; margin-top: 5px; }
+        .info-text { font-size: 13px; color: #a097b0; margin-top: 8px; font-style: italic; }
+
+        .flying-cart-petal { position: fixed; width: 25px; height: 25px; background: linear-gradient(135deg, #ffb7d5 0%, #ff7eb3 100%); border-radius: 50% 0 50% 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 15px rgba(255, 126, 179, 0.9); transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease-in; }
+        .form-container { display: none; opacity: 0; } .form-container.active { display: block; opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <script>renderHeader(true);</script>
+
+    <main>
+        <div class="content-left">
+            <div class="game-header">
+                <img src="images/hsr.webp" alt="Honkai: Star Rail">
+                <div>
+                    <h1>Honkai: Star Rail</h1>
+                    <p style="color: #d8c3e0; margin: 5px 0 0 0;">Пополнение Honkai: Star Rail по выгодным ценам с сохранением всех игровых бонусов: первое пополнение приходит <b style="color:#fff;">×2</b>, акции и подарки тоже работают — всё как в самой игре. Быстро и безопасно 🌸</p>
+                </div>
+            </div>
+
+            <div class="section-label">1. Метод пополнения</div>
+            <div class="method-switch" id="method-switcher">
+                <div class="method-switch-slider"></div>
+                <button class="method-btn active" id="btn-login" onclick="switchMethod('login')">🔑 По Входу (Дешевле)</button>
+                <button class="method-btn" id="btn-uid" onclick="switchMethod('uid')">⚡ По UID (Мгновенно)</button>
+            </div>
+
+            <div class="section-label">2. Выберите товары</div>
+            <div class="products-grid" id="products-grid"></div>
+        </div>
+
+        <div class="cart-right" id="cart-box">
+            <div id="step-cart" class="checkout-step active">
+                <div class="cart-header" id="cart-header">Ваш заказ 🎀</div>
+                <div class="cart-items" id="cart-items-container">
+                    <div style="color: #a097b0; text-align: center; padding: 20px 0; font-style: italic;">Корзина пуста. Выберите товары слева.</div>
+                </div>
+                <div class="cart-summary">
+                    <div class="total-row"><span>Итого:</span><span class="total-amount" id="cart-total-price">0 ₽</span></div>
+                </div>
+                <button class="checkout-btn" id="btn-continue" onclick="nextStep()" disabled>Продолжить</button>
+            </div>
+
+            <div id="step-details" class="checkout-step">
+                <button class="back-step-btn" onclick="prevStep()">← Назад в корзину</button>
+                
+                <div class="section-label">Связь</div>
+                <div class="input-group">
+                    <div class="contact-switch" id="contact-switcher">
+                        <div class="contact-switch-slider"></div>
+                        <button class="contact-btn active" id="btn-contact-tg" onclick="switchContact('tg')">✈️ Telegram</button>
+                        <button class="contact-btn" id="btn-contact-vk" onclick="switchContact('vk')">🌐 ВКонтакте</button>
+                    </div>
+                    <div class="input-field">
+                        <input type="text" id="contact-input" placeholder="Ваш @username">
+                    </div>
+                </div>
+
+                <div class="section-label">Игровые данные</div>
+                <div class="input-group form-container active" id="form-login">
+    <div class="input-row">
+        <div class="input-field"><label>Почта (Логин)</label><input type="text" id="login-input"></div>
+        <div class="input-field"><label>Пароль</label><input type="password" id="password-input"></div>
+    </div>
+    
+    <div id="login-extra-fields" style="margin-top: 15px; text-align: left;">
+        
+        <div class="input-field" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+            <label>Когда удобно передать код?</label>
+            <input type="text" id="code-time-input" placeholder="Например: после 18:00 / по выходным" style="width: 100%; box-sizing: border-box;">
+            <div class="warning-text" style="margin-top:8px;">⚠️ Менеджер свяжется с вами для получения кода.</div>
+        </div>
+
+        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; background: rgba(30, 25, 38, 0.6); padding: 12px 15px; border-radius: 12px; border: 1px solid #3a2b4d; transition: 0.3s;" onmouseover="this.style.borderColor='#ff7eb3'" onmouseout="this.style.borderColor='#3a2b4d'">
+            
+            <div style="position: relative; width: 22px; height: 22px; flex-shrink: 0;">
+                <input type="checkbox" id="urgent-checkbox" style="opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; z-index: 2; margin: 0;" onchange="document.getElementById('custom-check').style.background = this.checked ? '#ff7eb3' : 'transparent'; document.getElementById('custom-check-icon').style.opacity = this.checked ? '1' : '0';">
+                
+                <div id="custom-check" style="width: 22px; height: 22px; border: 2px solid #ff7eb3; border-radius: 6px; background: transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+                    <svg id="custom-check-icon" style="opacity: 0; transition: 0.2s;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+            </div>
+
+            <div>
+                <div style="color: #fff; font-weight: bold; font-size: 14px; display: flex; align-items: center;">
+                    🔥 Срочный заказ 
+                    <span onclick="event.preventDefault(); event.stopPropagation(); toast('🔥 Срочный заказ: выдаём вне очереди, вперёд остальных. Пожалуйста, не злоупотребляйте — включайте, только если правда нужно быстро 🙏', 'info');" style="color: #fff; font-weight: bold; font-size: 13px; margin-left: 6px; cursor: pointer; background: rgba(255,126,179,0.3); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center;">?</span>
+                </div>
+            </div>
+        </label>
+
+    </div>
+
+</div>
+                
+                <div class="input-group form-container" id="form-uid">
+                    <div class="input-row">
+                        <div class="input-field">
+                            <label>Ваш UID</label>
+                            <input type="text" id="uid-input" maxlength="12" placeholder="Ваш UID" oninput="fetchNickname(this.value, 'hsr')">
+                            <div id="uid-result" style="font-size: 11px; margin-top: 4px; font-weight: bold; display: none;"></div>
+                        </div>
+                        <div class="input-field">
+                            <label>Сервер</label>
+                            <select><option>Europe</option><option>Asia</option><option>America</option><option>TW, HK, MO</option></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="total-row" style="border: none; padding-top: 5px;">
+                    <span style="font-size: 16px;">Сумма:</span>
+                    <span class="total-amount" id="checkout-total-price" style="font-size: 20px;">0 ₽</span>
+                </div>
+                <div id="ref-checkout-box" class="ref-checkout-box" style="display:none;">
+                    <div id="ref-discount-note" style="display:none;">🎁 −3% по приглашению друга применится к заказу</div>
+                    <div id="tier-discount-note" style="display:none;"></div>
+                    <label id="ref-balance-row" style="display:none;">
+                        <input type="checkbox" id="use-balance-check">
+                        <span>Списать бонусный баланс (<b id="ref-balance-amt">0</b> ₽)</span>
+                    </label>
+                </div>
+                <label style="display:flex; align-items:flex-start; gap:8px; margin:12px 0; cursor:pointer; font-size:12px; color:#a097b0; line-height:1.4;">
+                    <input type="checkbox" id="consent-input" style="margin-top:2px; flex-shrink:0; accent-color:#ff7eb3;">
+                    <span>Я согласен с <a href="privacy.html" target="_blank" style="color:#ff7eb3;">обработкой персональных данных</a></span>
+                </label>
+                <button class="checkout-btn" onclick="checkout()">Перейти к оплате</button>
+            </div>
+        </div>
+    </main>
+
+    <script>renderFooter();</script>
+    <script src="main.js"></script>
+
+    <script>
+        // --- ЛОГИКА КОНКРЕТНО ЭТОЙ ИГРЫ (Корзина) ---
+        function nextStep() { document.getElementById('step-cart').classList.remove('active'); document.getElementById('step-details').classList.add('active'); }
+        function prevStep() { document.getElementById('step-details').classList.remove('active'); document.getElementById('step-cart').classList.add('active'); }
+
+        let currentMethod = 'login';
+        let currentContact = 'tg'; 
+        let serverPrices = { "login": {}, "uid": {} };
+        let cart = {};
+
+        function switchContact(method) {
+            currentContact = method;
+            const switcher = document.getElementById('contact-switcher');
+            const input = document.getElementById('contact-input');
+            if (method === 'vk') { switcher.classList.add('vk-active'); input.placeholder = "Ссылка на страницу VK"; } 
+            else { switcher.classList.remove('vk-active'); input.placeholder = "Ваш @username"; }
+            document.getElementById('btn-contact-tg').classList.toggle('active', method === 'tg');
+            document.getElementById('btn-contact-vk').classList.toggle('active', method === 'vk');
+        }
+
+        async function fetchPrices() {
+            try {
+                const response = await fetch('/api/prices');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data["Honkai: Star Rail"]) { serverPrices = data["Honkai: Star Rail"]; }
+                }
+            } catch (err) { console.warn("⚠️ Не удалось подключиться к серверу."); }
+            await loadProductMeta();
+            renderProducts();
+            updateCartUI();
+            const ro = consumeReorder('Honkai: Star Rail');
+            if (ro && ro.items) {
+                const applyRo = () => {
+                    cart = {};
+                    const p = serverPrices[currentMethod] || {};
+                    Object.keys(ro.items).forEach(n => { if (p[n]) cart[n] = ro.items[n]; });
+                    updateCartUI();
+                    if (Object.keys(cart).length) toast('Товары из прошлого заказа добавлены в корзину 🛒', 'success');
+                };
+                if (ro.method && ro.method !== currentMethod) { switchMethod(ro.method); setTimeout(applyRo, 340); }
+                else applyRo();
+            }
+        }
+
+        function getIcon(name) {
+            const n = name.toLowerCase();
+            const imgIcon = (src, emoji) => `<img src="images/${src}" loading="lazy" onerror="this.outerHTML='${emoji}'" style="width: 130px; height: 130px; object-fit: contain; filter: drop-shadow(0 0 15px rgba(255, 126, 179, 0.6)); margin-top: -10px;" alt="">`;
+            if (n.includes('все паки сущности')) return imgIcon('hsr_all.webp', '💎');
+            if (n.includes('6480 сущности')) return imgIcon('hsr_6480.webp', '💎');
+            if (n.includes('3280 сущности')) return imgIcon('hsr_3280.webp', '💎');
+            if (n.includes('1980 сущности')) return imgIcon('hsr_1980.webp', '💎');
+            if (n.includes('980 сущности')) return imgIcon('hsr_980.webp', '💎');
+            if (n.includes('300 сущности')) return imgIcon('hsr_300.webp', '💎');
+            if (n.includes('медаль')) return imgIcon('hsr_bp_premium.webp', '🌟');
+            if (n.includes('слава')) return imgIcon('hsr_bp_regular.webp', '📜');
+            if (n.includes('пропуск')) return imgIcon('hsr_pass.webp', '🎟️');
+            if (n.includes('помощь освоению')) return imgIcon('hsr_set1.webp', '🎁');
+            if (n.includes('особый билет')) return imgIcon('hsr_set3.webp', '🎫');
+            if (n.includes('набор')) return imgIcon('hsr_set2.webp', '🎁');
+            return '✨';
+        }
+
+        function renderProducts() {
+            renderGroupedProducts('products-grid', serverPrices, currentMethod, 'Honkai: Star Rail', getIcon);
+        }
+
+        function switchMethod(method) {
+            if (method === currentMethod) return;
+            currentMethod = method;
+            const switcher = document.getElementById('method-switcher');
+            if (method === 'uid') switcher.classList.add('uid-active'); else switcher.classList.remove('uid-active');
+            document.getElementById('btn-login').classList.toggle('active', method === 'login');
+            document.getElementById('btn-uid').classList.toggle('active', method === 'uid');
+            document.getElementById('form-login').classList.toggle('active', method === 'login');
+            document.getElementById('form-uid').classList.toggle('active', method === 'uid');
+            cart = {};
+            const grid = document.getElementById('products-grid');
+            grid.style.transition = 'transform 0.28s ease, opacity 0.28s ease';
+            grid.style.transform = 'translateX(-60px)';
+            grid.style.opacity = '0';
+            setTimeout(() => {
+                renderProducts(); updateCartUI();
+                grid.style.transition = 'none';
+                grid.style.transform = 'translateX(60px)';
+                void grid.offsetWidth;
+                grid.style.transition = 'transform 0.28s ease, opacity 0.28s ease';
+                grid.style.transform = 'translateX(0)';
+                grid.style.opacity = '1';
+            }, 280);
+        }
+
+        function flyToCart(button) {
+            const header = document.getElementById('cart-header');
+            const b = button.getBoundingClientRect(); const h = header.getBoundingClientRect();
+            const p = document.createElement('div'); p.classList.add('flying-cart-petal'); document.body.appendChild(p);
+            p.style.left = (b.left + b.width/2) + 'px'; p.style.top = (b.top + b.height/2) + 'px';
+            requestAnimationFrame(() => { p.style.transform = `translate(${h.left - b.left}px, ${h.top - b.top}px) scale(0.3) rotate(720deg)`; p.style.opacity = '0.5'; });
+            setTimeout(() => { p.remove(); header.classList.add('catch-bounce'); setTimeout(() => header.classList.remove('catch-bounce'), 300); }, 500);
+        }
+
+        function addToCart(event, productName) {
+            if (event && event.currentTarget) flyToCart(event.currentTarget);
+            cart[productName] = (cart[productName] || 0) + 1;
+            updateCartUI(); 
+        }
+
+        function removeFromCart(name) {
+            if (cart[name]) { cart[name]--; if (cart[name] <= 0) delete cart[name]; }
+            updateCartUI();
+            if (Object.keys(cart).length === 0) { prevStep(); }
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total-price');
+            const totalElCheckout = document.getElementById('checkout-total-price');
+            const continueBtn = document.getElementById('btn-continue');
+            
+            document.querySelectorAll('.buy-btn').forEach(btn => { btn.innerText = 'В корзину'; btn.classList.remove('active-btn'); });
+            document.querySelectorAll('.minus-btn').forEach(btn => { btn.style.display = 'none'; });
+
+            container.innerHTML = ''; let totalSum = 0; const cartKeys = Object.keys(cart);
+            
+            if (cartKeys.length === 0) { 
+                container.innerHTML = '<div style="color: #a097b0; text-align: center; padding: 20px 0; font-style: italic;">Корзина пуста. Выберите товары слева.</div>'; 
+                animateNumber(totalEl, 0); animateNumber(totalElCheckout, 0); continueBtn.disabled = true; return;
+            }
+            
+            continueBtn.disabled = false; 
+            
+            cartKeys.forEach(name => {
+                const qty = cart[name]; const price = serverPrices[currentMethod][name] || 0; totalSum += price * qty;
+                const encodedName = encodeURIComponent(name);
+                const btn = document.querySelector(`.buy-btn[data-name="${encodedName}"]`);
+                const minusBtn = document.querySelector(`.minus-btn[data-name="${encodedName}"]`);
+                
+                if (btn) { btn.innerText = `Добавить ещё (${qty} шт.)`; btn.classList.add('active-btn'); }
+                if (minusBtn) { minusBtn.style.display = 'flex'; }
+
+                const safeName = name.replace(/'/g, "\\'");
+                container.innerHTML += `
+                    <div class="cart-item">
+                        <div class="cart-item-info"><div class="cart-item-name">${name}</div><div class="cart-item-price">${price} ₽ / шт</div></div>
+                        <div class="cart-item-controls">
+                            <button class="qty-btn" onclick="removeFromCart('${safeName}')">-</button>
+                            <span class="qty-text">${qty}</span>
+                            <button class="qty-btn" onclick="addToCart(null, '${safeName}')">+</button>
+                        </div>
+                    </div>`;
+            });
+            animateNumber(totalEl, totalSum); animateNumber(totalElCheckout, totalSum); 
+        }
+
+        let uidTimeout;
+        async function fetchNickname(uid, game) {
+            const resultDiv = document.getElementById('uid-result');
+            if (uid.length < 9) { resultDiv.style.display = 'none'; return; }
+            resultDiv.style.display = 'block'; resultDiv.style.color = '#d8c3e0'; resultDiv.innerText = '⏳ Ищем...';
+            clearTimeout(uidTimeout);
+            uidTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/check_uid/${game}/${uid}`);
+                    const data = await response.json();
+                    if (data.nickname) { resultDiv.style.color = '#4dff88'; resultDiv.innerText = `✅ Аккаунт: ${data.nickname}`; }
+                    else { throw new Error(); }
+                } catch { resultDiv.style.color = '#ff4d4d'; resultDiv.innerText = '❌ Не найден'; }
+            }, 800);
+        }
+
+        async function checkout() {
+            if (Object.keys(cart).length === 0) { alert("Ваша корзина пуста! Добавьте хотя бы один товар."); return; }
+            if (!document.getElementById('consent-input') || !document.getElementById('consent-input').checked) { alert("Пожалуйста, подтвердите согласие на обработку персональных данных."); return; }
+            const contactInput = document.getElementById('contact-input').value;
+            if (!contactInput) { alert("Пожалуйста, укажите ваш Telegram или VK для связи!"); document.getElementById('contact-input').focus(); return; }
+
+            let userUid = null;
+            let userServer = null;
+            let codeTime = "";
+            let isUrgent = false;
+
+            if (currentMethod === 'uid') {
+                userUid = document.getElementById('uid-input').value;
+                userServer = document.querySelector('#form-uid select').value;
+                if (!userUid) { alert("Пожалуйста, укажите ваш UID!"); return; }
+            } else if (currentMethod === 'login') {
+                codeTime = document.getElementById('code-time-input') ? document.getElementById('code-time-input').value : "";
+                isUrgent = document.getElementById('urgent-checkbox') ? document.getElementById('urgent-checkbox').checked : false;
+            }
+
+            const tgUser = JSON.parse(localStorage.getItem('tg_user') || '{}');
+            const tgId = tgUser.id || 0;
+            const emailUser = JSON.parse(localStorage.getItem('email_user') || '{}');
+            const accountId = emailUser.id || '';
+            const myCode = tgId ? ('t' + tgId) : (accountId ? ('e' + accountId) : '');
+            const useBalance = !!(document.getElementById('use-balance-check') && document.getElementById('use-balance-check').checked);
+            const gameName = document.querySelector('.game-header h1').innerText;
+
+            const totalSum = parseInt(document.getElementById('checkout-total-price').innerText.replace(/\D/g, ''));
+            
+            const payload = { 
+                total_price: totalSum, 
+                contact: contactInput, 
+                items: cart, 
+                method: currentMethod,
+                uid: userUid,
+                server: userServer,
+                tg_id: tgId,
+                account_id: accountId,
+                my_code: myCode,
+                ref_code: localStorage.getItem('ref_code') || '',
+                use_balance: useBalance,
+                game_name: gameName,
+                code_time: codeTime,
+                is_urgent: isUrgent
+            };
+
+            const btn = document.querySelector('.checkout-btn:last-child');
+            const originalText = btn.innerText; btn.innerText = "Создание платежа ⏳..."; btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await response.json();
+                if (data.status === 'success') { 
+                    if (data.payment_url) { window.location.href = data.payment_url; } else { showOrderSuccess(currentMethod); cart = {}; updateCartUI(); prevStep(); btn.innerText = originalText; btn.disabled = false; }
+                } else { 
+                    alert("Ошибка платежной системы: " + data.message); btn.innerText = originalText; btn.disabled = false; 
+                }
+            } catch (err) { alert("Ошибка при соединении с сервером."); btn.innerText = originalText; btn.disabled = false; }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchPrices);
+    </script>
+</body>
+</html>

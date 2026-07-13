@@ -617,3 +617,26 @@ footer {
 .reviews-container::-webkit-scrollbar-thumb { background: #ff7eb3; border-radius: 4px; }
 
 @media (max-width: 900px) { .logo-container .header-btn { display: none; } }
+
+/* Safari (iOS) красит зону над адресной строкой фоном <html> — без этого она белая */
+html { background: #14101d; }
+
+/* Заголовки не сливаются с деревом сакуры: мягкая тёмная тень
+   (drop-shadow, а не text-shadow — корректно работает с градиентным текстом) */
+.main-title, .section-title { filter: drop-shadow(0 2px 10px rgba(10, 6, 16, 0.9)); }
+
+/* --- Мобилка --- */
+@media (max-width: 768px) {
+    /* Дерево меньше и полупрозрачнее — текст поверх него читается */
+    #sakura-tree { width: 320px; height: 260px; opacity: 0.4; }
+
+    /* Шапка тоньше и компактнее */
+    header { padding: 7px 14px; }
+    .logo-link { font-size: 22px; margin-right: 4px; }
+    .profile-btn { width: 37px; height: 37px; border-width: 1.5px; }
+    .profile-btn svg { width: 19px; height: 19px; }
+    .hamburger { gap: 5px; }
+    .hamburger span { width: 24px; height: 2.5px; }
+    .hamburger.active span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+    .hamburger.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+}

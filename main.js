@@ -31,10 +31,10 @@ function toggleFaq(el) { el.classList.toggle('active'); }
 // --- ИСТОРИЯ ЗАКАЗОВ ---
 // --- Повтор заказа («Заказать снова») ---
 const REORDER_PAGES = {
-    'Genshin Impact': 'genshin.html',
-    'Honkai: Star Rail': 'hsr.html',
-    'Wuthering Waves': 'wuwa.html',
-    'Zenless Zone Zero': 'zzz.html'
+    'Genshin Impact': '/genshin',
+    'Honkai: Star Rail': '/hsr',
+    'Wuthering Waves': '/wuwa',
+    'Zenless Zone Zero': '/zzz'
 };
 function reorder(game, method, items) {
     const page = REORDER_PAGES[game];

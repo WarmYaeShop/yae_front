@@ -2,7 +2,7 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 BASE_DIR = Path(__file__).parent
@@ -56,11 +56,22 @@ async def static(path: str):
     if not path:
         return FileResponse(BASE_DIR / "index.html")
 
+    # Чистые URL: /genshin.html → 301 на /genshin (одна каноничная ссылка)
+    if path.endswith(".html"):
+        clean = path[:-5]
+        return RedirectResponse("/" if clean == "index" else f"/{clean}", status_code=301)
+
     file = (BASE_DIR / path).resolve()
 
     # Защита от выхода за пределы директории
     if not str(file).startswith(str(BASE_DIR.resolve())):
         return FileResponse(BASE_DIR / "404.html", status_code=404)
+
+    # Чистые URL: /genshin → genshin.html
+    if not file.is_file():
+        html_file = file.with_name(file.name + ".html")
+        if html_file.is_file():
+            file = html_file
 
     if file.is_file():
         cache = _cache_header(file.name)

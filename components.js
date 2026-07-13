@@ -1,5 +1,5 @@
 function renderHeader(isGamePage = false) {
-    let backBtnHTML = isGamePage ? `<a href="#" onclick="goToPage('index.html'); return false;" style="color: #d8c3e0; text-decoration: none; font-weight: bold; font-size: 16px; margin-right: 20px; transition: 0.3s; display: flex; align-items: center; z-index: 150;">← Назад</a>` : '';
+    let backBtnHTML = isGamePage ? `<a href="#" onclick="goToPage('/'); return false;" style="color: #d8c3e0; text-decoration: none; font-weight: bold; font-size: 16px; margin-right: 20px; transition: 0.3s; display: flex; align-items: center; z-index: 150;">← Назад</a>` : '';
 
     document.write(`
     <div id="preloader">
@@ -156,7 +156,7 @@ function renderHeader(isGamePage = false) {
                     <p class="auth-hint">Кнопка появится на рабочем домене (на localhost Telegram её прячет).</p>
                 </div>
 
-                <div class="auth-privacy">Входя, вы соглашаетесь с <a href="privacy.html" target="_blank">политикой конфиденциальности</a></div>
+                <div class="auth-privacy">Входя, вы соглашаетесь с <a href="/privacy" target="_blank">политикой конфиденциальности</a></div>
             </div>
 
             <div id="auth-account-view" style="display:none;">
@@ -236,7 +236,7 @@ function renderHeader(isGamePage = false) {
 
     <header>
         <div class="logo-container">
-            <a href="#" onclick="goToPage('index.html'); return false;" class="logo-link">Donate by Yae Miko</a>
+            <a href="#" onclick="goToPage('/'); return false;" class="logo-link">Donate by Yae Miko</a>
             <button class="header-btn" onclick="openPromosModal()">🔥 Акции</button>
             <button class="header-btn" onclick="showModal('safety-modal')">🔒 Безопасность</button>
             <button class="header-btn" onclick="openReviewsModal()">💗 Отзывы</button>
@@ -306,16 +306,16 @@ function renderFooter() {
             Профессиональный сервис пополнения игровых балансов. Все внутриигровые товары, названия и торговые марки принадлежат их соответствующим владельцам.
         </div>
         <div style="margin-bottom: 10px;">
-            <a href="offer.html" style="color: #a097b0; font-size: 13px; text-decoration: underline;">Публичная оферта</a>
+            <a href="/offer" style="color: #a097b0; font-size: 13px; text-decoration: underline;">Публичная оферта</a>
             &nbsp;·&nbsp;
-            <a href="privacy.html" style="color: #a097b0; font-size: 13px; text-decoration: underline;">Политика конфиденциальности</a>
+            <a href="/privacy" style="color: #a097b0; font-size: 13px; text-decoration: underline;">Политика конфиденциальности</a>
         </div>
         <div class="footer-copy" style="margin-bottom: 6px; line-height: 1.7;">ОсОО «Глобал Бридж» · ОГРН 309678-3301-ООО · ИНН 9909704508<br>Кыргызская Республика, г. Бишкек, Октябрьский район, ул. Юнусалиева 185/1<br>📧 donatebyyaemiko@gmail.com</div>
         <div class="footer-copy">© 2021-2026 Yae Shop. Все права защищены.</div>
     </footer>
 
     <div id="cookie-banner" class="cookie-banner">
-        <span>🍪 Мы используем файлы cookie и обрабатываем данные для работы сайта. Продолжая пользоваться сайтом, вы соглашаетесь с <a href="privacy.html" target="_blank">политикой конфиденциальности</a>.</span>
+        <span>🍪 Мы используем файлы cookie и обрабатываем данные для работы сайта. Продолжая пользоваться сайтом, вы соглашаетесь с <a href="/privacy" target="_blank">политикой конфиденциальности</a>.</span>
         <button onclick="acceptCookies()">Принять</button>
     </div>
     `);

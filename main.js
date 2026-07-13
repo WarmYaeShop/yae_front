@@ -37,12 +37,32 @@ function toggleMobileMenu() {
     document.getElementById('menu-overlay').classList.toggle('active'); 
     document.getElementById('hamburger-btn').classList.toggle('active'); 
 }
-function showModal(id) { 
-    document.getElementById(id).classList.add('active'); 
+// Пока открыта модалка — сайт под ней не листается (особенно важно на iPhone).
+// body фиксируется на текущей позиции, при закрытии позиция возвращается.
+let _modalScrollY = 0;
+function _lockPageScroll() {
+    if (document.body.classList.contains('modal-open')) return;
+    _modalScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.style.top = (-_modalScrollY) + 'px';
+    document.body.classList.add('modal-open');
+}
+function _unlockPageScroll() {
+    if (document.querySelector('.modal-overlay.active')) return; // открыта другая модалка
+    if (!document.body.classList.contains('modal-open')) return;
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, _modalScrollY);
+}
+function showModal(id) {
+    document.getElementById(id).classList.add('active');
+    _lockPageScroll();
     if (id === 'support-modal') loadTickets();
 }
-function closeModal(id, e) { 
-    if (!e || e.target.id === id || e.target.classList.contains('close-modal-btn')) document.getElementById(id).classList.remove('active'); 
+function closeModal(id, e) {
+    if (!e || e.target.id === id || e.target.classList.contains('close-modal-btn')) {
+        document.getElementById(id).classList.remove('active');
+        _unlockPageScroll();
+    }
 }
 function toggleFaq(el) { el.classList.toggle('active'); }
 

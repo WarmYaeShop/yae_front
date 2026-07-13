@@ -128,7 +128,8 @@ input:-webkit-autofill:active {
     background: linear-gradient(145deg, #221a2e, #15101d);
     border: 1px solid #ff7eb3; border-radius: 14px;
     padding: 14px 18px; display: flex; align-items: center; gap: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 9000;
+    /* z-index ниже модалок (2000): баннер не перекрывает открытые окна */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1900;
     opacity: 0; transition: transform 0.45s cubic-bezier(0.25,0.8,0.25,1), opacity 0.45s;
 }
 .cookie-banner.show { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -299,7 +300,10 @@ body {
     animation: fadeIn 0.15s ease-out;
     margin: 0; padding: 0;
     width: 100%; height: 100%;
+    /* clip вместо hidden: hidden на body ломает sticky-шапку в iOS Safari
+       (шапка «уезжает» при скролле). clip режет так же, но не создаёт скролл-контейнер. */
     overflow-x: hidden;
+    overflow-x: clip;
     font-family: 'Roboto', sans-serif;
     background: radial-gradient(circle at 50% 30%, #251636 0%, #0d0a14 70%, #000000 100%);
     background-attachment: fixed;
@@ -514,6 +518,7 @@ header {
     background: rgba(13, 10, 20, 0.85);
     z-index: 2000; display: flex; justify-content: center; align-items: center;
     opacity: 0; visibility: hidden; transition: 0.3s;
+    padding: 14px; box-sizing: border-box; /* отступ, чтобы рамка модалки была видна на телефоне */
 }
 .modal-overlay.active { opacity: 1; visibility: visible; }
 .custom-modal {
@@ -522,14 +527,26 @@ header {
     max-width: 500px; width: 90%;
     box-shadow: 0 10px 40px rgba(255, 126, 179, 0.3);
     position: relative; transform: translateY(-20px); transition: 0.3s;
+    /* Высокие модалки скроллятся внутри, а не обрезаются экраном */
+    max-height: calc(100vh - 28px);
+    max-height: calc(100dvh - 28px);
+    overflow-y: auto;
+    overscroll-behavior: contain; /* скролл модалки не прокручивает сайт под ней */
+    -webkit-overflow-scrolling: touch;
 }
 .modal-overlay.active .custom-modal { transform: translateY(0); }
+/* Крестик прилипает к верху при скролле модалки — всегда под рукой */
 .close-modal-btn {
-    position: absolute; top: 15px; right: 15px;
-    background: transparent; border: none; color: #a097b0;
-    font-size: 28px; cursor: pointer; transition: 0.3s; line-height: 1;
+    position: sticky; top: 0; float: right; z-index: 5;
+    margin: -16px -16px 0 8px;
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(30, 25, 38, 0.85); border: none; color: #a097b0;
+    font-size: 26px; cursor: pointer; transition: 0.3s; line-height: 1;
 }
-.close-modal-btn:hover { color: #ff4d4d; }
+.close-modal-btn:hover { color: #ff4d4d; background: rgba(255, 77, 77, 0.12); }
+/* Фон не листается, пока открыта модалка (top ставит JS, чтобы не прыгал скролл) */
+body.modal-open { position: fixed; left: 0; right: 0; width: 100%; }
 
 /* --- Настройки (тоггл) --- */
 .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #3a2b4d; }
@@ -652,4 +669,9 @@ html { background: #14101d; }
     .hamburger span { width: 24px; height: 2.5px; }
     .hamburger.active span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
     .hamburger.active span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+    /* Модалки на телефоне: компактнее внутренние отступы, рамка видна по краям */
+    .custom-modal { padding: 24px 16px 20px; width: 100% !important; }
+    .close-modal-btn { margin: -12px -4px 0 8px; }
+    .reviews-container { max-height: none; padding-right: 4px; }
 }

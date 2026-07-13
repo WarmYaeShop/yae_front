@@ -1,5 +1,23 @@
+// --- СЕССИЯ: токен автоматически уходит со всеми /api-запросами ---
+function getSessionToken() { return localStorage.getItem('session_token') || ''; }
+(function () {
+    const _fetch = window.fetch;
+    window.fetch = function (input, init) {
+        try {
+            const url = typeof input === 'string' ? input : (input && input.url) || '';
+            const token = getSessionToken();
+            if (token && url.indexOf('/api/') !== -1 && url.indexOf('//') === -1) {
+                init = init || {};
+                init.headers = new Headers(init.headers || {});
+                if (!init.headers.has('Authorization')) init.headers.set('Authorization', 'Bearer ' + token);
+            }
+        } catch (e) {}
+        return _fetch(input, init);
+    };
+})();
+
 // --- ПЕРЕХОД ПО СТРАНИЦАМ ---
-function goToPage(url) { 
+function goToPage(url) {
     document.body.classList.add('fade-out'); 
     setTimeout(() => { window.location.href = url; }, 150); 
 }
@@ -89,14 +107,8 @@ async function openOrdersModal() {
 }
 async function refreshOrdersList() {
     const container = document.getElementById('orders-list');
-    const tgUser = JSON.parse(localStorage.getItem('tg_user') || 'null');
-    const emailUser = JSON.parse(localStorage.getItem('email_user') || 'null');
-
-    let historyUrl = null;
-    if (tgUser && tgUser.id) historyUrl = `/api/orders/history?tg_id=${tgUser.id}`;
-    else if (emailUser && emailUser.id) historyUrl = `/api/orders/history?account_id=${emailUser.id}`;
-
-    if (!historyUrl) {
+    // История берётся по токену сессии (уходит с запросом автоматически)
+    if (!getSessionToken()) {
         container.innerHTML = '<div style="color: #a097b0; text-align: center; padding: 20px;">Пожалуйста, войдите (через Telegram или почту), чтобы видеть свои заказы.</div>';
         return;
     }
@@ -107,7 +119,7 @@ async function refreshOrdersList() {
     }
 
     try {
-        const res = await fetch(historyUrl);
+        const res = await fetch('/api/orders/history');
         const data = await res.json();
         
         if (data.orders && data.orders.length > 0) {
@@ -680,7 +692,7 @@ async function initCheckoutReferral() {
 }
 function onTelegramAuth(user) {
     fetch('/api/auth/telegram', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(user) })
-    .then(res => res.json()).then(data => { if(data.status==='success'){ localStorage.setItem('tg_user', JSON.stringify(user)); location.reload(); }});
+    .then(res => res.json()).then(data => { if(data.status==='success'){ localStorage.setItem('tg_user', JSON.stringify(user)); if(data.token) localStorage.setItem('session_token', data.token); location.reload(); }});
 }
 // Подсветка кнопки профиля, когда пользователь вошёл
 function showUserProfile(user) {
@@ -717,12 +729,13 @@ async function verifyEmailCode() {
         const data = await res.json();
         if (res.ok) {
             localStorage.setItem('email_user', JSON.stringify({ first_name: data.user.masked, email: data.user.email, id: data.user.id, type: 'email' }));
+            if (data.token) localStorage.setItem('session_token', data.token);
             location.reload();
         } else { msg.style.color = '#ff4d4d'; msg.innerText = data.detail || 'Неверный код'; }
     } catch (e) { msg.style.color = '#ff4d4d'; msg.innerText = 'Ошибка сети'; }
 }
 
-function logout() { localStorage.removeItem('tg_user'); localStorage.removeItem('email_user'); location.reload(); }
+function logout() { localStorage.removeItem('tg_user'); localStorage.removeItem('email_user'); localStorage.removeItem('session_token'); location.reload(); }
 
 // === Товары: категории + карточки (общий рендер для всех игр) ===
 let PRODUCT_META = {};

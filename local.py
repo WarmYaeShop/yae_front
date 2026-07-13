@@ -62,9 +62,10 @@ async def static(path: str):
         return RedirectResponse("/" if clean == "index" else f"/{clean}", status_code=301)
 
     file = (BASE_DIR / path).resolve()
+    base = BASE_DIR.resolve()
 
-    # Защита от выхода за пределы директории
-    if not str(file).startswith(str(BASE_DIR.resolve())):
+    # Защита от выхода за пределы директории (по границе каталога, не по префиксу строки)
+    if base != file and base not in file.parents:
         return FileResponse(BASE_DIR / "404.html", status_code=404)
 
     # Чистые URL: /genshin → genshin.html

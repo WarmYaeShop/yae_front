@@ -58,9 +58,36 @@ function consumeReorder(gameName) {
     return null;
 }
 
+// Трекер статуса: Оплата → Выполняется → Готово
+function orderTrackerHTML(status) {
+    // step: сколько шагов пройдено (0..3); fail — заказ отменён/ошибка
+    let step = 0, fail = false;
+    if (status === 'Ожидает оплаты' || status === 'В обработке') step = 1;
+    else if (status === 'Оплачен') step = 2;
+    else if (status === 'Выполнен') step = 3;
+    else if (status === 'Отменён' || status === 'Отменен' || status === 'Ошибка оплаты') { step = 1; fail = true; }
+    const labels = ['Оплата', 'Выполняется', 'Готово'];
+    const dots = labels.map((l, i) => {
+        const done = !fail && step > i;
+        const cls = fail && i === 0 ? 'ot-dot ot-fail' : (done ? 'ot-dot ot-done' : 'ot-dot');
+        return `<div class="ot-step"><span class="${cls}">${fail && i === 0 ? '✕' : (done ? '✓' : i + 1)}</span><small>${l}</small></div>`;
+    }).join('<div class="ot-line' + '"></div>');
+    return `<div class="order-tracker${fail ? ' ot-tracker-fail' : ''}">${dots}</div>`;
+}
+
+let _ordersRefreshTimer = null;
 async function openOrdersModal() {
     showModal('orders-modal');
-    
+    // Автообновление статусов, пока окно открыто (раз в 20 секунд)
+    clearInterval(_ordersRefreshTimer);
+    _ordersRefreshTimer = setInterval(() => {
+        const m = document.getElementById('orders-modal');
+        if (!m || !m.classList.contains('active')) { clearInterval(_ordersRefreshTimer); return; }
+        refreshOrdersList();
+    }, 20000);
+    await refreshOrdersList();
+}
+async function refreshOrdersList() {
     const container = document.getElementById('orders-list');
     const tgUser = JSON.parse(localStorage.getItem('tg_user') || 'null');
     const emailUser = JSON.parse(localStorage.getItem('email_user') || 'null');
@@ -74,7 +101,10 @@ async function openOrdersModal() {
         return;
     }
 
-    container.innerHTML = '<div style="text-align:center; color:#a097b0; padding: 20px;">⏳ Загрузка заказов...</div>';
+    // «Загрузку» показываем только при первом открытии — фоновое обновление не мигает
+    if (!window.__ordersHistory) {
+        container.innerHTML = '<div style="text-align:center; color:#a097b0; padding: 20px;">⏳ Загрузка заказов...</div>';
+    }
 
     try {
         const res = await fetch(historyUrl);
@@ -101,6 +131,7 @@ async function openOrdersModal() {
                                 ${_escHtml(o.status || 'В обработке')}
                             </div>
                         </div>
+                        ${orderTrackerHTML(o.status)}
                         ${canReorder ? `<button onclick="reorderById(${o.id})" style="margin-top: 12px; width: 100%; background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3; padding: 9px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,126,179,0.12)'" onmouseout="this.style.background='transparent'">🔁 Заказать снова</button>` : ''}
                     </div>
                 `;
@@ -1015,6 +1046,18 @@ async function applySiteContent() {
     // Контакты/ссылки (на всех страницах — в шапке/футере/модалках)
     if (c.tg_channel) document.querySelectorAll('.js-tg-channel').forEach(a => { a.href = c.tg_channel; });
     if (c.support_operator) document.querySelectorAll('.js-support-op').forEach(a => { a.href = c.support_operator; });
+    // Яндекс.Метрика — включается когда в контенте сайта задан номер счётчика
+    if (c.metrika_id && !window.__ymLoaded) {
+        window.__ymLoaded = true;
+        const id = parseInt(c.metrika_id, 10);
+        if (id) {
+            (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],
+            k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+            (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+            ym(id, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

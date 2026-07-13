@@ -120,7 +120,7 @@
             <div id="step-cart" class="checkout-step active">
                 <div class="cart-header" id="cart-header">Ваш заказ 🎀</div>
                 <div class="cart-items" id="cart-items-container">
-                    <div style="color: #a097b0; text-align: center; padding: 20px 0; font-style: italic;">Корзина пуста. Выберите товары слева.</div>
+                    <div style="color: #a097b0; text-align: center; padding: 20px 0; font-style: italic;">Корзина пуста. Добавьте товары из каталога.</div>
                 </div>
                 <div class="cart-summary">
                     <div class="total-row"><span>Итого:</span><span class="total-amount" id="cart-total-price">0 ₽</span></div>
@@ -360,7 +360,7 @@
             container.innerHTML = ''; let totalSum = 0; const cartKeys = Object.keys(cart);
             
             if (cartKeys.length === 0) { 
-                container.innerHTML = '<div style="color: #a097b0; text-align: center; padding: 20px 0; font-style: italic;">Корзина пуста. Выберите товары слева.</div>'; 
+                container.innerHTML = '<div style="color: #a097b0; text-align: center; padding: 20px 0; font-style: italic;">Корзина пуста. Добавьте товары из каталога.</div>'; 
                 animateNumber(totalEl, 0); animateNumber(totalElCheckout, 0); continueBtn.disabled = true; return;
             }
             

@@ -1045,8 +1045,12 @@ async function applySiteContent() {
     if (badges && Array.isArray(c.badges)) {
         badges.innerHTML = c.badges.map(b => `<div class="badge">${_escHtml(b)}</div>`).join('');
     }
-    // FAQ (только на index)
+    // FAQ (только на index); пустой FAQ — прячем секцию, чтобы не висел голый заголовок
     const list = document.getElementById('faq-list');
+    if (list) {
+        const sec = list.closest('.faq-section');
+        if (sec) sec.style.display = (Array.isArray(c.faq) && c.faq.length) ? '' : 'none';
+    }
     if (list && Array.isArray(c.faq)) {
         list.innerHTML = c.faq.map(item => `
             <div class="faq-item" onclick="toggleFaq(this)">

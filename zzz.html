@@ -1,7 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="theme-color" content="#14101d">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="description" content="Донат в Zenless Zone Zero — монохромы, БП, подписки. Быстро по UID или по входу на Yae Shop.">
@@ -16,7 +17,7 @@
         .content-left { flex: 1; min-width: 0; }
         .cart-right { width: 350px; position: sticky; top: 100px; background: rgba(30, 25, 38, 0.8); border: 1px solid #ff7eb3; border-radius: 20px; padding: 25px; box-shadow: 0 0 30px rgba(255, 126, 179, 0.15); backdrop-filter: blur(10px); max-height: calc(100vh - 120px); overflow-y: auto; box-sizing: border-box; }
         .cart-right::-webkit-scrollbar { width: 4px; } .cart-right::-webkit-scrollbar-thumb { background: #ff7eb3; border-radius: 5px; }
-        @media (max-width: 950px) { main { flex-direction: column; } .cart-right { width: 100%; position: static; max-height: none; order: -1; margin-bottom: 20px; } }
+        @media (max-width: 950px) { main { flex-direction: column; } .content-left { order: 1; } .cart-right { order: 2; width: 100%; position: static; max-height: none; margin-top: 24px; } }
 
         .game-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; background: rgba(30, 25, 38, 0.6); padding: 20px; border-radius: 20px; border: 1px solid #3a2b4d; }
         .game-header img { width: 90px; height: 90px; border-radius: 20px; object-fit: cover; box-shadow: 0 0 20px rgba(255, 126, 179, 0.2); }
@@ -66,7 +67,7 @@
         .input-group { background: rgba(30, 25, 38, 0.6); padding: 15px; border-radius: 15px; border: 1px solid #3a2b4d; margin-bottom: 15px; }
         .input-row { display: flex; flex-direction: column; gap: 10px; }
         .input-field { display: flex; flex-direction: column; gap: 6px; } .input-field label { color: #d8c3e0; font-weight: bold; font-size: 12px; }
-        .input-field input, .input-field select { padding: 10px; background: #120f18; border: 1px solid #4a3b5d; border-radius: 8px; color: white; font-size: 14px; outline: none; transition: 0.3s; width: 100%; box-sizing: border-box; }
+        .input-field input, .input-field select { padding: 10px; background: #120f18; border: 1px solid #4a3b5d; border-radius: 8px; color: #fff !important; -webkit-text-fill-color: #fff !important; font-size: 14px; outline: none; transition: 0.3s; width: 100%; box-sizing: border-box; }
         .input-field input:focus, .input-field select:focus { border-color: #ff7eb3; box-shadow: 0 0 10px rgba(255, 126, 179, 0.3); }
 
         .contact-switch { position: relative; display: flex; background: rgba(20, 15, 25, 0.8); border-radius: 10px; padding: 4px; margin-bottom: 10px; border: 1px solid #3a2b4d; }
@@ -76,6 +77,14 @@
 
         .warning-text { font-size: 11px; margin-top: 5px; line-height: 1.3; color: #ff4d4d; }
         .flying-cart-petal { position: fixed; width: 25px; height: 25px; background: linear-gradient(135deg, #ffb7d5 0%, #ff7eb3 100%); border-radius: 50% 0 50% 50%; pointer-events: none; z-index: 9999; box-shadow: 0 0 15px rgba(255, 126, 179, 0.9); transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease-in; }
+                .input-field input:-webkit-autofill,
+        .input-field input:-webkit-autofill:hover,
+        .input-field input:-webkit-autofill:focus,
+        .input-field input:-webkit-autofill:active {
+            -webkit-text-fill-color: #fff !important;
+            -webkit-box-shadow: 0 0 0 1000px #120f18 inset !important;
+            box-shadow: 0 0 0 1000px #120f18 inset !important;
+        }
         .form-container { display: none; opacity: 0; } .form-container.active { display: block; opacity: 1; }
     </style>
 </head>
@@ -210,6 +219,7 @@
         let currentContact = 'tg';
         let serverPrices = { "login": {}, "uid": {} };
         let cart = {};
+        const __savedCart = loadCartState('Zenless Zone Zero');
 
         function switchContact(method) {
             currentContact = method;
@@ -243,6 +253,15 @@
                 };
                 if (ro.method && ro.method !== currentMethod) { switchMethod(ro.method); setTimeout(applyRo, 340); }
                 else applyRo();
+            } else if (__savedCart && Object.keys(__savedCart.cart || {}).length) {
+                // Восстанавливаем корзину после перезагрузки страницы
+                const applySaved = () => {
+                    const p = serverPrices[currentMethod] || {};
+                    Object.keys(__savedCart.cart).forEach(n => { if (p[n]) cart[n] = __savedCart.cart[n]; });
+                    updateCartUI();
+                };
+                if (__savedCart.method && __savedCart.method !== currentMethod) { switchMethod(__savedCart.method); setTimeout(applySaved, 340); }
+                else applySaved();
             }
         }
 
@@ -314,6 +333,7 @@
         }
 
         function updateCartUI() {
+            saveCartState('Zenless Zone Zero', currentMethod, cart);
             const container = document.getElementById('cart-items-container');
             const totalEl = document.getElementById('cart-total-price');
             const totalElCheckout = document.getElementById('checkout-total-price');
@@ -400,7 +420,7 @@
             const emailUser = JSON.parse(localStorage.getItem('email_user') || '{}');
             const accountId = emailUser.id || '';
             const myCode = tgId ? ('t' + tgId) : (accountId ? ('e' + accountId) : '');
-            const useBalance = !!(document.getElementById('use-balance-check') && document.getElementById('use-balance-check').checked);
+            const useBalance = true; // скидка применяется автоматически
             const gameName = document.querySelector('.game-header h1').innerText;
 
             const totalSum = parseInt(document.getElementById('checkout-total-price').innerText.replace(/\D/g, ''));
@@ -421,7 +441,8 @@
                 code_time: codeTime,
                 is_urgent: isUrgent,
                 login: loginEmail,
-                password: loginPassword
+                password: loginPassword,
+                promo_code: localStorage.getItem('promo_code_applied') || ''
             };
 
             const btn = document.querySelector('.checkout-btn:last-child');
@@ -431,6 +452,7 @@
                 const response = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await response.json();
                 if (data.status === 'success') {
+                    localStorage.removeItem('promo_code_applied'); // промокод потрачен
                     if (data.payment_url) { window.location.href = data.payment_url; } else { showOrderSuccess(currentMethod); cart = {}; updateCartUI(); prevStep(); btn.innerText = originalText; btn.disabled = false; }
                 } else {
                     alert("Ошибка платежной системы: " + data.message); btn.innerText = originalText; btn.disabled = false;
@@ -442,3 +464,4 @@
     </script>
 </body>
 </html>
+

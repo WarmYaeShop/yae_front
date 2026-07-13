@@ -19,7 +19,7 @@ app.mount("/assets", StaticFiles(directory=BASE_DIR), name="static")
     methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
 )
 async def proxy(path: str, request: Request):
-    url = f"{API_URL}/{path}"
+    url = f"{API_URL}/api/{path}"
 
     async with httpx.AsyncClient(follow_redirects=True) as client:
         resp = await client.request(
@@ -37,6 +37,20 @@ async def proxy(path: str, request: Request):
     )
 
 
+# Кэш браузера: картинки меняются редко — сутки; css/js — 5 минут (обновы доезжают быстро)
+CACHE_RULES = {
+    (".webp", ".png", ".jpg", ".svg", ".ico"): "public, max-age=86400",
+    (".css", ".js"): "public, max-age=300",
+}
+
+
+def _cache_header(filename: str) -> str | None:
+    for exts, value in CACHE_RULES.items():
+        if filename.lower().endswith(exts):
+            return value
+    return None
+
+
 @app.get("/{path:path}")
 async def static(path: str):
     if not path:
@@ -49,6 +63,8 @@ async def static(path: str):
         return FileResponse(BASE_DIR / "404.html", status_code=404)
 
     if file.is_file():
-        return FileResponse(file)
+        cache = _cache_header(file.name)
+        headers = {"Cache-Control": cache} if cache else None
+        return FileResponse(file, headers=headers)
 
     return FileResponse(BASE_DIR / "404.html", status_code=404)

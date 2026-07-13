@@ -2,6 +2,15 @@
    ОБЩИЕ СТИЛИ — подключается на всех страницах
    ============================================= */
 
+/* Убираем синее выделение при клике на кнопки/карточки */
+button, a, .game-card, .product-card, .menu-item, .header-btn,
+.cart-item, .buy-btn, .minus-btn, .checkout-btn, .auth-btn-primary,
+.auth-btn-danger, .ref-copy-btn, .profile-btn, .cat-tab {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
 /* Текст во всех текстовых полях всегда белый (перебивает чёрный от автозаполнения) */
 input[type="text"], input[type="email"], input[type="number"],
 input[type="tel"], input[type="password"], input[type="search"], textarea {
@@ -310,13 +319,8 @@ body::before {
         radial-gradient(circle at 20% 25%, rgba(255, 126, 179, 0.12), transparent 42%),
         radial-gradient(circle at 82% 70%, rgba(150, 90, 220, 0.14), transparent 46%),
         radial-gradient(circle at 60% 15%, rgba(120, 160, 255, 0.08), transparent 40%);
-    animation: bg-drift 20s ease-in-out infinite alternate;
+    /* Анимация убрана: слой размером 140% экрана перерисовывался бесконечно и грел CPU */
 }
-@keyframes bg-drift {
-    0%   { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(3%, -3%) scale(1.12); }
-}
-body.low-end-mode::before { animation: none; }
 
 /* --- Сакура --- */
 #sakura-tree {
@@ -325,7 +329,7 @@ body.low-end-mode::before { animation: none; }
     background-image: url('images/sakura_tree.webp');
     background-size: contain; background-repeat: no-repeat; background-position: left top;
     z-index: 1; pointer-events: none;
-    filter: drop-shadow(0 8px 24px rgba(255, 126, 179, 0.25)) drop-shadow(0 4px 12px rgba(20, 10, 30, 0.7));
+    /* drop-shadow убран: фильтр на большой анимированной картинке пересчитывался каждый кадр */
     transform-origin: 15% 0;
     animation: sway 6s ease-in-out infinite;
 }
@@ -351,7 +355,6 @@ body.low-end-mode::before { animation: none; }
     height: 100%;
     border-radius: 100% 0 100% 0;
     opacity: var(--petal-opacity, 0.85);
-    filter: drop-shadow(0 2px 3px rgba(255, 126, 179, 0.3));
     will-change: transform;
     animation: petal-sway var(--sway-duration, 3s) ease-in-out infinite alternate;
 }
@@ -365,8 +368,9 @@ header {
     position: sticky; top: 0; z-index: 100;
     display: flex; justify-content: space-between; align-items: center;
     padding: 15px 40px;
-    background: rgba(13, 10, 20, 0.8);
-    backdrop-filter: blur(10px);
+    /* Без backdrop-filter: блюр на sticky-шапке пересчитывается каждый кадр скролла
+       и роняет FPS на ПК без аппаратного ускорения */
+    background: rgba(13, 10, 20, 0.94);
     border-bottom: 1px solid #3a2b4d;
 }
 .logo-container { display: flex; align-items: center; gap: 15px; }
@@ -426,8 +430,8 @@ header {
 .side-menu {
     position: fixed; top: 0; right: -380px;
     width: 330px; height: 100vh;
-    background: linear-gradient(160deg, rgba(32, 23, 45, 0.97), rgba(15, 11, 20, 0.98));
-    backdrop-filter: blur(22px);
+    /* blur убран: пересчитывался каждый кадр анимации выезда меню и ронял FPS */
+    background: linear-gradient(160deg, rgba(32, 23, 45, 0.99), rgba(15, 11, 20, 0.99));
     border-left: 1px solid rgba(255, 126, 179, 0.4);
     box-shadow: -12px 0 45px rgba(0, 0, 0, 0.55);
     z-index: 1000;
@@ -437,7 +441,7 @@ header {
 .side-menu.active { right: 0; }
 .menu-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 999;
+    background: rgba(0,0,0,0.65); z-index: 999;
     opacity: 0; visibility: hidden; transition: 0.3s;
 }
 .menu-overlay.active { opacity: 1; visibility: visible; }
@@ -473,6 +477,11 @@ header {
 .side-menu.active .menu-item:nth-child(2) { transition-delay: 0.16s; }
 .side-menu.active .menu-item:nth-child(3) { transition-delay: 0.22s; }
 .side-menu.active .menu-item:nth-child(4) { transition-delay: 0.28s; }
+/* Сбрасываем задержку при hover — иначе nth-child delay даёт «тупёж» подсветки */
+.side-menu.active .menu-item:hover {
+    transition-delay: 0s;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
 .menu-item:hover {
     background: rgba(255, 126, 179, 0.12); border-color: #ff7eb3;
     transform: translateX(-4px); box-shadow: 0 4px 20px rgba(255, 126, 179, 0.15);
@@ -502,7 +511,7 @@ header {
 /* --- Модалки --- */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(13, 10, 20, 0.8); backdrop-filter: blur(5px);
+    background: rgba(13, 10, 20, 0.85);
     z-index: 2000; display: flex; justify-content: center; align-items: center;
     opacity: 0; visibility: hidden; transition: 0.3s;
 }
@@ -534,11 +543,42 @@ input:checked + .slider:before { transform: translateX(20px); }
 /* --- Режим слабого ПК --- */
 body.no-tree #sakura-tree { display: none !important; }
 body.no-petals #sakura-container { display: none !important; }
-body.low-end-mode * { animation: none !important; transition: none !important; backdrop-filter: none !important; box-shadow: none !important; text-shadow: none !important; }
-body.low-end-mode header,
-body.low-end-mode footer,
-body.low-end-mode .side-menu,
-body.low-end-mode .custom-modal { background: #120f18 !important; }
+/* Кнопки выбора качества в настройках */
+.fx-btn {
+    flex: 1; min-width: 70px; padding: 8px 6px; border-radius: 10px;
+    border: 1px solid #3a2b4d; background: transparent; color: #d8c3e0;
+    font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;
+}
+.fx-btn:hover { border-color: #ff7eb3; }
+.fx-btn.active { background: rgba(255, 126, 179, 0.15); border-color: #ff7eb3; color: #ff7eb3; }
+
+/* ============================================================
+   КАЧЕСТВО ЭФФЕКТОВ — три уровня (выбирается в настройках или авто по FPS)
+   Средний (по умолчанию): без блюров и вечных анимаций фона — быстро и красиво.
+   ============================================================ */
+
+/* --- ✨ Максимум (body.fx-max): вся красота для мощных устройств --- */
+body.fx-max::before { animation: bg-drift 20s ease-in-out infinite alternate; }
+@keyframes bg-drift {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(3%, -3%) scale(1.12); }
+}
+body.fx-max #sakura-tree { filter: drop-shadow(0 8px 24px rgba(255, 126, 179, 0.25)) drop-shadow(0 4px 12px rgba(20, 10, 30, 0.7)); }
+body.fx-max .petal-inner { filter: drop-shadow(0 2px 3px rgba(255, 126, 179, 0.3)); }
+body.fx-max header { background: rgba(13, 10, 20, 0.8); backdrop-filter: blur(10px); }
+body.fx-max .side-menu { backdrop-filter: blur(22px); background: linear-gradient(160deg, rgba(32, 23, 45, 0.97), rgba(15, 11, 20, 0.98)); }
+body.fx-max .menu-overlay { backdrop-filter: blur(3px); }
+body.fx-max .modal-overlay { backdrop-filter: blur(5px); background: rgba(13, 10, 20, 0.8); }
+body.fx-max .cart-right { backdrop-filter: blur(10px); background: rgba(30, 25, 38, 0.8); }
+
+/* --- 🔋 Эконом (body.low-end-mode): без тяжёлого, но тени и ховеры остаются --- */
+body.low-end-mode * { backdrop-filter: none !important; }
+body.low-end-mode #sakura-container { display: none; }   /* лепестки */
+body.low-end-mode #sakura-tree { animation: none; }      /* дерево видно, но статично */
+body.low-end-mode .hero-track { transition: none; }      /* карусель без скольжения */
+body.low-end-mode .prod-grid .product-card { animation: none; }
+body.low-end-mode .tier-progress-fill,
+body.low-end-mode .hero-progress-bar { transition: none; }
 
 /* --- Футер --- */
 footer {

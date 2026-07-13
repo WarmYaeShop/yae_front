@@ -85,9 +85,16 @@ function renderHeader(isGamePage = false) {
                 <div><div style="color:#fff;font-weight:bold;">Лепестки</div><div style="color:#a097b0;font-size:12px;">Падающая сакура</div></div>
                 <label class="switch"><input type="checkbox" id="toggle-petals" onchange="updateSetting('petals', this.checked)"><span class="slider"></span></label>
             </div>
-            <div class="setting-row" style="margin-top:10px; border:1px solid #ff4d4d; padding:10px; border-radius:10px; display: flex; justify-content: space-between; align-items: center;">
-                <div><div style="color:#ff4d4d;font-weight:bold;">Слабое устройство</div><div style="color:#d8c3e0;font-size:12px;">Отключить всё тяжелое</div></div>
-                <label class="switch"><input type="checkbox" id="toggle-lowend" onchange="updateSetting('lowend', this.checked)"><span class="slider"></span></label>
+            <div style="margin-top:14px;">
+                <div style="color:#fff;font-weight:bold;margin-bottom:4px;">✨ Качество эффектов</div>
+                <div style="color:#a097b0;font-size:12px;margin-bottom:10px;">«Авто» само подберёт под ваше устройство</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button class="fx-btn" data-fx="auto" onclick="updateFx('auto')">🤖 Авто</button>
+                    <button class="fx-btn" data-fx="max" onclick="updateFx('max')">✨ Максимум</button>
+                    <button class="fx-btn" data-fx="mid" onclick="updateFx('mid')">⚖️ Средний</button>
+                    <button class="fx-btn" data-fx="low" onclick="updateFx('low')">🔋 Эконом</button>
+                </div>
+                <div id="fx-auto-hint" style="color:#7c7090;font-size:11px;margin-top:6px;min-height:14px;"></div>
             </div>
         </div>
     </div>
@@ -96,7 +103,7 @@ function renderHeader(isGamePage = false) {
         <div class="custom-modal" onclick="event.stopPropagation()" style="max-width: 500px; width: 90%;">
             <button class="close-modal-btn" onclick="closeModal('orders-modal')">×</button>
             <h2 style="margin-bottom: 5px;">🎁 Мои заказы</h2>
-            <p style="color: #a097b0; font-size: 13px; margin-bottom: 15px;">История ваших покупок через Telegram</p>
+            <p style="color: #a097b0; font-size: 13px; margin-bottom: 15px;">История ваших покупок</p>
             
             <div id="orders-list" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
                 </div>
@@ -167,15 +174,25 @@ function renderHeader(isGamePage = false) {
 
                 <div class="ref-panel">
                     <div class="ref-stats">
-                        <div class="ref-stat"><b id="ref-balance">0</b><small>₽ бонусов</small></div>
-                        <div class="ref-stat"><b id="ref-invited">0</b><small>друзей</small></div>
+                        <div class="ref-stat"><b id="ref-invited">0</b><small>приглашено</small></div>
                     </div>
                     <div class="ref-label">🔗 Ваша реферальная ссылка</div>
                     <div class="ref-link-row">
                         <input id="ref-link" class="auth-input" readonly value="" style="margin-bottom:0;">
                         <button id="ref-copy-btn" onclick="copyRefLink()" class="ref-copy-btn">Копировать</button>
                     </div>
-                    <p class="auth-hint" style="margin-top:8px;">Друг получит −3% на первый заказ, вы — 5% от его заказа на бонусный баланс 🎁</p>
+                    <p class="auth-hint" style="margin-top:8px;">Вы оба получите −3% скидку: друг — на первый заказ, вы — на следующий 🎁</p>
+                </div>
+
+                <div class="promo-panel" style="background: rgba(20,15,30,0.7); border: 1px solid #3a2b4d; border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;">
+                    <div class="ref-label" style="margin-bottom: 8px;">🎟 Промокод</div>
+                    <div class="ref-link-row">
+                        <input id="promo-code-input" class="auth-input" placeholder="Введите промокод…" maxlength="50"
+                            style="margin-bottom:0; text-transform:uppercase; letter-spacing:1px;"
+                            oninput="this.value=this.value.toUpperCase()">
+                        <button onclick="applyPromoCode()" id="promo-apply-btn" class="ref-copy-btn">Применить</button>
+                    </div>
+                    <div id="promo-apply-msg" style="font-size:12px; margin-top:6px; min-height:16px;"></div>
                 </div>
 
                 <button onclick="closeModal('auth-modal'); openOrdersModal();" class="auth-btn-primary">🎁 История заказов</button>
@@ -276,7 +293,7 @@ function renderHeader(isGamePage = false) {
                 <span class="menu-item-arrow">›</span>
             </a>
         </div>
-        <a class="side-menu-tg js-tg-channel" href="https://t.me/donatsgenshin" target="_blank">✈️ Наш Telegram-канал</a>
+        <a class="side-menu-tg js-tg-channel" href="https://t.me/donatsgenshin" target="_blank" rel="noopener">✈️ Наш Telegram-канал</a>
     </nav>
     `);
 }

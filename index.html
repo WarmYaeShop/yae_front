@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ff7eb3">
+    <meta name="theme-color" content="#14101d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Yae Shop">
     <link rel="apple-touch-icon" href="images/Genshin_Impact.webp">
@@ -80,6 +80,12 @@
             .hero-content { max-width: 85%; padding: 0 25px; }
             .hero-content h2 { font-size: 26px; }
             .hero-content p { font-size: 14px; margin-bottom: 16px; }
+        }
+        /* Мобилка: игры по 2 в ряд */
+        @media (max-width: 600px) {
+            .game-grid { gap: 12px; }
+            .game-card { width: calc(50% - 6px); box-sizing: border-box; padding: 10px; }
+            .game-name { font-size: 13px; }
         }
     </style>
     <script src="components.js"></script>

@@ -94,11 +94,11 @@ async function openOrdersModal() {
                     <div style="background: rgba(20, 15, 25, 0.8); border: 1px solid #3a2b4d; border-radius: 12px; padding: 15px; margin-bottom: 10px; transition: 0.3s;" onmouseover="this.style.borderColor='#ff7eb3'" onmouseout="this.style.borderColor='#3a2b4d'">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <div style="font-weight: bold; color: #fff; margin-bottom: 5px;">Заказ #S${o.id} <span style="color: #a097b0; font-size: 12px; margin-left: 5px;">${o.game}</span></div>
+                                <div style="font-weight: bold; color: #fff; margin-bottom: 5px;">Заказ #S${o.id} <span style="color: #a097b0; font-size: 12px; margin-left: 5px;">${_escHtml(o.game)}</span></div>
                                 <div style="color: #ff7eb3; font-weight: bold; font-size: 16px;">${o.total_price} ₽</div>
                             </div>
                             <div style="color: ${statusColor}; font-weight: bold; font-size: 13px; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 8px;">
-                                ${o.status || 'В обработке'}
+                                ${_escHtml(o.status || 'В обработке')}
                             </div>
                         </div>
                         ${canReorder ? `<button onclick="reorderById(${o.id})" style="margin-top: 12px; width: 100%; background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3; padding: 9px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,126,179,0.12)'" onmouseout="this.style.background='transparent'">🔁 Заказать снова</button>` : ''}
@@ -159,7 +159,7 @@ async function loadSchedule() {
         }).join('');
         const note = document.getElementById('schedule-note');
         if (note) {
-            if (s.note) { note.style.display = 'block'; note.innerHTML = '📌 ' + s.note; }
+            if (s.note) { note.style.display = 'block'; note.innerText = '📌 ' + s.note; }
             else { note.style.display = 'none'; }
         }
     } catch (e) {
@@ -274,7 +274,7 @@ async function loadTickets() {
                 let replyHtml = '';
                 if (isResolved && t.admin_reply) {
                     replyHtml = `<div style="margin-top: 10px; background: rgba(77, 255, 136, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #4dff88; font-size: 13px; color: #d8c3e0; text-align: left;">
-                                    <b style="color: #4dff88;">Ответ поддержки:</b><br>${t.admin_reply}
+                                    <b style="color: #4dff88;">Ответ поддержки:</b><br>${_escHtml(t.admin_reply)}
                                  </div>`;
                 }
 
@@ -284,7 +284,7 @@ async function loadTickets() {
                             <span style="color: #a097b0;">Тикет #${t.id}</span>
                             <span style="color: ${statusColor}; font-weight: bold;">${statusText}</span>
                         </div>
-                        <div style="color: #fff; font-size: 14px; line-height: 1.4;">${t.message}</div>
+                        <div style="color: #fff; font-size: 14px; line-height: 1.4;">${_escHtml(t.message)}</div>
                         ${replyHtml}
                     </div>
                 `;
@@ -295,20 +295,78 @@ async function loadTickets() {
     } catch (e) { console.warn('Не удалось загрузить историю тикетов'); }
 }
 
+// --- КАЧЕСТВО ЭФФЕКТОВ: max / mid / low ---
+// Пользователь выбирает в настройках; режим «Авто» меряет FPS и решает сам.
+function fxMode() {
+    const v = localStorage.getItem('setting_fx');
+    if (v === 'max' || v === 'mid' || v === 'low') return v;
+    return localStorage.getItem('fx_auto') || 'mid'; // результат авто-замера (до замера — средний)
+}
+function updateFx(mode) {
+    if (mode === 'auto') {
+        localStorage.removeItem('setting_fx');
+        localStorage.removeItem('fx_auto'); // перемерим при следующей загрузке
+        toast('Авто-режим: качество подберётся при следующей загрузке страницы', 'info');
+    } else {
+        localStorage.setItem('setting_fx', mode);
+    }
+    applySettings();
+    if (typeof highlightFxButtons === 'function') highlightFxButtons();
+}
+// Замер FPS (только в режиме «Авто» и если ещё не меряли)
+function initAutoFx() {
+    // миграция со старого тумблера «Слабое устройство»
+    if (localStorage.getItem('setting_lowend') === 'true' && !localStorage.getItem('setting_fx')) {
+        localStorage.setItem('setting_fx', 'low');
+        localStorage.removeItem('setting_lowend');
+    }
+    if (localStorage.getItem('setting_fx') || localStorage.getItem('fx_auto')) return;
+    let frames = 0;
+    let start = null;
+    function tick(ts) {
+        if (document.hidden) { start = null; frames = 0; requestAnimationFrame(tick); return; }
+        if (start === null) { start = ts; frames = 0; }
+        frames++;
+        const elapsed = ts - start;
+        if (elapsed >= 2500) {
+            const fps = frames / (elapsed / 1000);
+            const mode = fps >= 50 ? 'max' : (fps >= 32 ? 'mid' : 'low');
+            localStorage.setItem('fx_auto', mode);
+            applySettings();
+            if (mode === 'low') toast('⚡ Включён экономный режим для плавной работы. Изменить можно в настройках.', 'info');
+            return;
+        }
+        requestAnimationFrame(tick);
+    }
+    window.addEventListener('load', () => setTimeout(() => requestAnimationFrame(tick), 2000));
+}
+initAutoFx();
+
 // --- НАСТРОЙКИ ---
 function applySettings() {
     const isTreeOff = localStorage.getItem('setting_tree') === 'false';
     const isPetalsOff = localStorage.getItem('setting_petals') === 'false';
-    const isLowEnd = localStorage.getItem('setting_lowend') === 'true';
+    const fx = fxMode();
     document.body.classList.toggle('no-tree', isTreeOff);
     document.body.classList.toggle('no-petals', isPetalsOff);
-    document.body.classList.toggle('low-end-mode', isLowEnd);
+    document.body.classList.toggle('low-end-mode', fx === 'low');
+    document.body.classList.toggle('fx-max', fx === 'max');
 }
 function updateSetting(key, val) { localStorage.setItem('setting_' + key, val); applySettings(); }
+function highlightFxButtons() {
+    const chosen = localStorage.getItem('setting_fx') || 'auto';
+    document.querySelectorAll('.fx-btn').forEach(b => b.classList.toggle('active', b.dataset.fx === chosen));
+    const hint = document.getElementById('fx-auto-hint');
+    if (hint) {
+        const auto = localStorage.getItem('fx_auto');
+        const names = { max: '✨ Максимум', mid: '⚖️ Средний', low: '🔋 Эконом' };
+        hint.innerText = (chosen === 'auto' && auto) ? ('Авто выбрал: ' + names[auto]) : '';
+    }
+}
 function openSettingsModal() {
     document.getElementById('toggle-tree').checked = localStorage.getItem('setting_tree') !== 'false';
     document.getElementById('toggle-petals').checked = localStorage.getItem('setting_petals') !== 'false';
-    document.getElementById('toggle-lowend').checked = localStorage.getItem('setting_lowend') === 'true';
+    highlightFxButtons();
     showModal('settings-modal');
 }
 
@@ -319,9 +377,15 @@ const PETAL_PALETTES = [
     'linear-gradient(135deg, #ff9ec7 0%, #ff5fa2 100%)'  // насыщенный
 ];
 function createPetal() {
-    if (localStorage.getItem('setting_petals') === 'false' || localStorage.getItem('setting_lowend') === 'true') return;
+    const fx = fxMode();
+    if (localStorage.getItem('setting_petals') === 'false' || fx === 'low') return;
+    if (document.hidden) return; // вкладка не видна — не плодим лепестки
     const container = document.getElementById('sakura-container');
     if (!container) return;
+    // Лимит живых лепестков: максимум — как раньше (много), средний — умеренно
+    const isMobile = window.innerWidth <= 768;
+    const cap = fx === 'max' ? (isMobile ? 18 : 40) : (isMobile ? 8 : 16);
+    if (container.childElementCount >= cap) return;
 
     const petal = document.createElement('div');
     petal.classList.add('petal');
@@ -352,7 +416,13 @@ function createPetal() {
     container.appendChild(petal);
     setTimeout(() => petal.remove(), duration * 1000);
 }
-setInterval(createPetal, 350);
+// Частота появления: на «Максимуме» — как в оригинале, на «Среднем» — вдвое реже
+let _petalTick = 0;
+setInterval(() => {
+    _petalTick++;
+    if (fxMode() !== 'max' && _petalTick % 2) return;
+    createPetal();
+}, window.innerWidth <= 768 ? 600 : 330);
 
 // --- АНИМАЦИЯ ЦЕНЫ (плавная прокрутка цифр) ---
 function animateNumber(el, to, suffix = ' ₽') {
@@ -405,6 +475,7 @@ function openProfile() {
         accView.style.display = 'block';
         document.getElementById('auth-account-name').innerText = user.first_name || 'Гость';
         loadReferral();
+        _restorePromoUI();
     } else {
         loginView.style.display = 'block';
         accView.style.display = 'none';
@@ -418,6 +489,74 @@ function switchAuthTab(tab) {
     document.getElementById('auth-pane-email').style.display = isEmail ? 'block' : 'none';
     document.getElementById('auth-pane-tg').style.display = isEmail ? 'none' : 'block';
 }
+// --- СОХРАНЕНИЕ КОРЗИНЫ (переживает перезагрузку страницы, живёт 3 дня) ---
+function saveCartState(game, method, cart) {
+    try {
+        if (cart && Object.keys(cart).length) {
+            localStorage.setItem('saved_cart_' + game, JSON.stringify({ method, cart, ts: Date.now() }));
+        } else {
+            localStorage.removeItem('saved_cart_' + game);
+        }
+    } catch (e) {}
+}
+function loadCartState(game) {
+    try {
+        const d = JSON.parse(localStorage.getItem('saved_cart_' + game) || 'null');
+        if (d && d.cart && Date.now() - (d.ts || 0) < 3 * 24 * 3600 * 1000) return d;
+        localStorage.removeItem('saved_cart_' + game);
+    } catch (e) {}
+    return null;
+}
+
+// --- ПРОМОКОД ---
+async function applyPromoCode() {
+    const input = document.getElementById('promo-code-input');
+    const msg = document.getElementById('promo-apply-msg');
+    const btn = document.getElementById('promo-apply-btn');
+    if (!input || !msg) return;
+    const code = (input.value || '').trim().toUpperCase();
+    if (!code) { msg.style.color = '#ff4d4d'; msg.innerText = 'Введите промокод'; return; }
+    const oldText = btn.innerText; btn.innerText = '⏳...'; btn.disabled = true;
+    try {
+        const res = await fetch('/api/promo/check?code=' + encodeURIComponent(code));
+        const data = await res.json();
+        if (res.ok && data.valid) {
+            localStorage.setItem('promo_code_applied', code);
+            const discText = data.discount_type === 'percent'
+                ? `−${data.discount_value}%`
+                : `−${data.discount_value}₽`;
+            msg.style.color = '#4dff88';
+            msg.innerText = `✅ Применён! Скидка ${discText} на следующий заказ`;
+            btn.innerText = 'Изменить';
+            btn.disabled = false;
+        } else {
+            msg.style.color = '#ff4d4d';
+            msg.innerText = data.detail || 'Промокод не действителен';
+            btn.innerText = oldText; btn.disabled = false;
+        }
+    } catch (e) {
+        msg.style.color = '#ff4d4d'; msg.innerText = 'Ошибка сети';
+        btn.innerText = oldText; btn.disabled = false;
+    }
+}
+function clearPromoCode() {
+    localStorage.removeItem('promo_code_applied');
+    const input = document.getElementById('promo-code-input');
+    const msg = document.getElementById('promo-apply-msg');
+    if (input) input.value = '';
+    if (msg) { msg.style.color = ''; msg.innerText = ''; }
+}
+function _restorePromoUI() {
+    const saved = localStorage.getItem('promo_code_applied');
+    const input = document.getElementById('promo-code-input');
+    const msg = document.getElementById('promo-apply-msg');
+    const btn = document.getElementById('promo-apply-btn');
+    if (!saved || !input) return;
+    input.value = saved;
+    if (msg) { msg.style.color = '#4dff88'; msg.innerText = `✅ Промокод активен: ${saved}`; }
+    if (btn) btn.innerText = 'Изменить';
+}
+
 // --- РЕФЕРАЛЬНАЯ ПРОГРАММА ---
 function myRefCode() {
     const tg = JSON.parse(localStorage.getItem('tg_user') || 'null');
@@ -433,7 +572,6 @@ async function loadReferral() {
     linkEl.value = location.origin + '/index.html?ref=' + code;
     try {
         const d = await (await fetch('/api/referral/info?code=' + encodeURIComponent(code))).json();
-        document.getElementById('ref-balance').innerText = d.balance;
         document.getElementById('ref-invited').innerText = d.invited;
         renderTier(d.tier);
     } catch (e) {}
@@ -467,6 +605,29 @@ async function initCheckoutReferral() {
     const box = document.getElementById('ref-checkout-box');
     if (!box) return;
     let show = false;
+
+    // Активный промокод — показываем в корзине, что скидка применится
+    const promoCode = localStorage.getItem('promo_code_applied');
+    let promoNote = document.getElementById('promo-checkout-note');
+    if (promoCode) {
+        try {
+            const pd = await (await fetch('/api/promo/check?code=' + encodeURIComponent(promoCode))).json();
+            if (pd && pd.valid) {
+                if (!promoNote) {
+                    promoNote = document.createElement('div');
+                    promoNote.id = 'promo-checkout-note';
+                    box.insertBefore(promoNote, box.firstChild);
+                }
+                const discText = pd.discount_type === 'percent' ? `−${pd.discount_value}%` : `−${pd.discount_value}₽`;
+                promoNote.innerHTML = `🎟 Промокод <b>${promoCode}</b> (${discText}) применится при оплате`;
+                promoNote.style.display = 'block';
+                show = true;
+            } else {
+                localStorage.removeItem('promo_code_applied'); // код протух — убираем
+                if (promoNote) promoNote.style.display = 'none';
+            }
+        } catch (e) {}
+    } else if (promoNote) promoNote.style.display = 'none';
     const myCode = myRefCode();
     const refCode = localStorage.getItem('ref_code');
     const note = document.getElementById('ref-discount-note');
@@ -481,8 +642,7 @@ async function initCheckoutReferral() {
                 tierNote.innerHTML = `${d.tier.icon} Скидка статуса <b>${d.tier.name}</b> −${d.tier.discount}% уже учтена`;
                 tierNote.style.display = 'block'; show = true;
             } else if (tierNote) tierNote.style.display = 'none';
-            if (balRow && d.balance > 0) { document.getElementById('ref-balance-amt').innerText = d.balance; balRow.style.display = 'flex'; show = true; }
-            else if (balRow) balRow.style.display = 'none';
+            if (balRow) balRow.style.display = 'none'; // баланс применяется автоматически, без чекбокса
         } catch (e) {}
     }
     box.style.display = show ? 'block' : 'none';
@@ -538,17 +698,23 @@ let PRODUCT_META = {};
 let CATEGORY_ICONS = {};
 let DISCOUNTS_DATA = {};
 async function loadProductMeta() {
-    try { DISCOUNTS_DATA = await (await fetch('/api/discounts')).json(); } catch (e) { DISCOUNTS_DATA = {}; }
-    if (Object.keys(PRODUCT_META).length) return;
-    try { PRODUCT_META = await (await fetch('/product_meta.json')).json(); } catch (e) { PRODUCT_META = {}; }
-    try { CATEGORY_ICONS = await (await fetch('/api/category_icons')).json(); } catch (e) { CATEGORY_ICONS = {}; }
+    // Все три запроса — параллельно (быстрее загрузка товаров)
+    const [disc, meta, icons] = await Promise.all([
+        fetch('/api/discounts').then(r => r.json()).catch(() => ({})),
+        Object.keys(PRODUCT_META).length ? Promise.resolve(PRODUCT_META) : fetch('/api/product_meta').then(r => r.json()).catch(() => ({})),
+        fetch('/api/category_icons').then(r => r.json()).catch(() => ({}))
+    ]);
+    DISCOUNTS_DATA = disc || {};
+    PRODUCT_META = meta || {};
+    CATEGORY_ICONS = icons || {};
 }
 function catLabel(cat) {
     const ic = CATEGORY_ICONS[cat];
     return ic ? (ic + ' ' + cat) : cat;
 }
 function productCardHTML(name, price, icon, nameDecorator, discounts) {
-    const safeName = name.replace(/'/g, "\\'");
+    // Экранируем ' для JS-строки и " для HTML-атрибута (иначе товары с кавычками в названии не кладутся в корзину)
+    const safeName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const dataName = encodeURIComponent(name);
     const disc = DISCOUNTS_DATA[name] || (discounts && discounts[name]) || 0;
     let badge = '', priceHtml = price + ' ₽';
@@ -606,7 +772,8 @@ function renderGroupedProducts(gridId, serverPrices, method, game, getIcon, name
     window.__catCtx = { groups, cur, getIcon, nameDecorator, discounts, allNow, availNow, otherLabel };
 
     grid.classList.add('grouped');
-    const chips = `<div class="cat-tabs"><button class="cat-tab active" data-cat="__all" onclick="filterCategory(this)">Все <span class="cat-count">${allNow.length}</span></button>` +
+    const searchBox = `<input class="prod-search" id="prod-search" type="search" placeholder="🔍 Поиск товара…" autocomplete="off" oninput="searchProducts(this.value)">`;
+    const chips = searchBox + `<div class="cat-tabs"><button class="cat-tab active" data-cat="__all" onclick="filterCategory(this)">Все <span class="cat-count">${allNow.length}</span></button>` +
         order.map(c => {
             const cnt = groups[c].filter(availNow).length;
             const badge = cnt > 0 ? `<span class="cat-count">${cnt}</span>` : `<span class="cat-count cat-locked">${otherLabel}</span>`;
@@ -616,9 +783,29 @@ function renderGroupedProducts(gridId, serverPrices, method, game, getIcon, name
     const cards = allNow.map(n => productCardHTML(n, cur[n], getIcon(n), nameDecorator, discounts)).join('');
     grid.innerHTML = chips + `<div class="prod-grid" id="prod-grid-main">${cards}</div>`;
 }
+function searchProducts(query) {
+    const ctx = window.__catCtx;
+    const grid = document.getElementById('prod-grid-main');
+    if (!ctx || !grid) return;
+    const q = (query || '').trim().toLowerCase();
+    if (!q) {
+        // Пустой запрос — возвращаем активную категорию
+        const active = document.querySelector('.cat-tab.active');
+        if (active) filterCategory(active);
+        return;
+    }
+    // Ищем по ВСЕМ доступным товарам, независимо от выбранной категории
+    const items = ctx.allNow.filter(n => n.toLowerCase().includes(q));
+    grid.innerHTML = items.length
+        ? items.map(n => productCardHTML(n, ctx.cur[n], ctx.getIcon(n), ctx.nameDecorator, ctx.discounts)).join('')
+        : `<div class="cat-unavailable">😔 Ничего не нашлось по запросу «${_escHtml(q)}»</div>`;
+    if (typeof updateCartUI === 'function') updateCartUI();
+}
 function filterCategory(el) {
     const ctx = window.__catCtx;
     if (!ctx) return;
+    const search = document.getElementById('prod-search');
+    if (search) search.value = ''; // выбор категории сбрасывает поиск
     document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     const cat = (el.dataset.cat && el.dataset.cat !== '__all') ? decodeURIComponent(el.dataset.cat) : '__all';
@@ -680,6 +867,33 @@ function initCookieBanner() {
     if (localStorage.getItem('cookie_ok')) return;
     const b = document.getElementById('cookie-banner');
     if (b) setTimeout(() => b.classList.add('show'), 800);
+}
+
+// --- Плавающая кнопка корзины (только на страницах игр) ---
+function initFloatingCartBtn() {
+    const totalEl = document.getElementById('checkout-total-price');
+    if (!totalEl) return; // не страница игры — выходим
+
+    const btn = document.createElement('div');
+    btn.id = 'cart-float-btn';
+    btn.title = 'Перейти к корзине';
+    btn.innerHTML = '<span class="cfb-icon">🛒</span><span class="cfb-sum" id="cfb-sum-text">0 ₽</span>';
+    btn.addEventListener('click', () => {
+        const cart = document.querySelector('.cart-right');
+        if (cart) cart.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    document.body.appendChild(btn);
+
+    function updateBtn() {
+        const text = totalEl.innerText || '0';
+        const total = parseInt(text.replace(/\D/g, '')) || 0;
+        btn.style.display = total > 0 ? 'flex' : 'none';
+        const sumEl = document.getElementById('cfb-sum-text');
+        if (sumEl) sumEl.innerText = total + ' ₽';
+    }
+
+    new MutationObserver(updateBtn).observe(totalEl, { childList: true, characterData: true, subtree: true });
+    updateBtn();
 }
 
 // --- PWA: регистрация service worker (установка как приложение) ---
@@ -806,7 +1020,7 @@ async function applySiteContent() {
 document.addEventListener('DOMContentLoaded', () => {
     // Запоминаем реферальный код из ссылки ?ref=...
     const refParam = new URLSearchParams(location.search).get('ref');
-    if (refParam) localStorage.setItem('ref_code', refParam);
+    if (refParam) localStorage.setItem('ref_code', refParam.slice(0, 50));
 
     const savedUser = localStorage.getItem('tg_user') || localStorage.getItem('email_user');
     if (savedUser) showUserProfile(JSON.parse(savedUser));
@@ -820,4 +1034,5 @@ document.addEventListener('DOMContentLoaded', () => {
     applySiteContent();
     applySettings();
     initCardTilt();
+    initFloatingCartBtn();
 });

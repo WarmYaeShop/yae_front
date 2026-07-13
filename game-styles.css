@@ -2,6 +2,25 @@
    СТИЛИ СТРАНИЦ ИГР — подключается на genshin/hsr/wuwa/zzz
    ============================================= */
 
+/* --- Плавающая кнопка корзины --- */
+#cart-float-btn {
+    position: fixed; bottom: 24px; right: 24px; z-index: 950;
+    width: 70px; height: 70px; border-radius: 50%;
+    background: linear-gradient(135deg, #ff4dff, #b300b3);
+    box-shadow: 0 4px 22px rgba(255, 77, 255, 0.5);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; color: #fff; font-weight: bold; text-align: center; line-height: 1.2;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid rgba(255,255,255,0.15);
+}
+#cart-float-btn:hover { transform: scale(1.12); box-shadow: 0 6px 28px rgba(255, 77, 255, 0.7); }
+#cart-float-btn:active { transform: scale(0.96); }
+#cart-float-btn .cfb-icon { font-size: 22px; line-height: 1; }
+#cart-float-btn .cfb-sum { font-size: 11px; margin-top: 2px; opacity: 0.95; }
+@media (max-width: 950px) {
+    #cart-float-btn { bottom: 16px; right: 16px; width: 62px; height: 62px; }
+}
+
 main {
     max-width: 1200px; margin: 0 auto; padding: 40px 20px;
     position: relative; z-index: 5;
@@ -10,10 +29,10 @@ main {
 .content-left { flex: 1; min-width: 0; }
 .cart-right {
     width: 350px; position: sticky; top: 100px;
-    background: rgba(30, 25, 38, 0.8); border: 1px solid #ff7eb3;
+    background: rgba(30, 25, 38, 0.94); border: 1px solid #ff7eb3;
     border-radius: 20px; padding: 25px;
     box-shadow: 0 0 30px rgba(255, 126, 179, 0.15);
-    backdrop-filter: blur(10px);
+    /* blur убран: на sticky-элементе пересчитывался при каждом скролле (FPS) */
     max-height: calc(100vh - 120px); overflow-y: auto; box-sizing: border-box;
 }
 .cart-right::-webkit-scrollbar { width: 4px; }
@@ -193,6 +212,29 @@ body.low-end-mode .prod-grid .product-card { animation: none; }
 .cat-tab.active { background: linear-gradient(90deg,#ff4dff,#b300b3); border-color: transparent; color: #fff; box-shadow: 0 4px 14px rgba(179,0,179,0.3); }
 .cat-tab.active .cat-count { background: rgba(255,255,255,0.18); color: #fff; }
 #prod-grid-main { transition: opacity 0.18s ease; }
+
+/* --- Поиск по товарам --- */
+.prod-search {
+    width: 100%; box-sizing: border-box;
+    background: rgba(20, 15, 25, 0.8); border: 1px solid #3a2b4d; border-radius: 12px;
+    color: #fff; padding: 11px 16px; font-size: 14px; font-family: inherit;
+    margin-bottom: 14px; outline: none; transition: border-color 0.2s;
+}
+.prod-search:focus { border-color: #ff7eb3; }
+.prod-search::placeholder { color: #7c7090; }
+
+/* --- Мобилка: 2 товара в строке, компактные карточки --- */
+@media (max-width: 600px) {
+    .products-grid, .prod-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .product-card { padding: 12px 10px; border-radius: 16px; }
+    .product-icon { font-size: 34px; margin-bottom: 6px; }
+    .product-icon img { max-width: 64px; max-height: 64px; }
+    .product-name { font-size: 12px; margin-bottom: 10px; }
+    .product-price { font-size: 16px; margin-bottom: 10px; }
+    .old-price { font-size: 12px; }
+    .buy-btn { padding: 8px 4px; font-size: 12px; }
+    .minus-btn { width: 36px; font-size: 20px; }
+}
 .cat-tab-locked { opacity: 0.75; }
 .cat-count.cat-locked { background: rgba(255,77,77,0.18); color: #ffb3b3; font-size: 10px; }
 .cat-unavailable { grid-column: 1 / -1; padding: 26px 18px; text-align: center; background: rgba(255,255,255,0.03); border: 1px dashed #4a3b5d; border-radius: 14px; color: #a097b0; font-size: 14px; line-height: 1.7; }

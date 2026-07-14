@@ -185,7 +185,11 @@
         <div class="home-reviews">
             <div class="section-title">Отзывы наших клиентов 💗</div>
             <p class="home-reviews-sub">Реальные комментарии из нашего Telegram-канала</p>
-            <div id="tg-reviews-home"></div>
+            <div class="tg-reviews-card">
+                <div id="tg-reviews-home" class="collapsed"></div>
+                <div class="tg-reviews-fade" id="tg-reviews-fade"></div>
+                <button class="tg-reviews-toggle" id="tg-reviews-toggle" onclick="toggleHomeReviews()">Развернуть отзывы ▾</button>
+            </div>
         </div>
 
         <div class="how-section">
@@ -306,6 +310,17 @@
                 io.observe(box);
             } else load();
         })();
+
+        // Свернуть/развернуть отзывы на главной
+        function toggleHomeReviews() {
+            const box = document.getElementById('tg-reviews-home');
+            const fade = document.getElementById('tg-reviews-fade');
+            const btn = document.getElementById('tg-reviews-toggle');
+            const collapsed = box.classList.toggle('collapsed');
+            fade.style.display = collapsed ? '' : 'none';
+            btn.innerText = collapsed ? 'Развернуть отзывы ▾' : 'Свернуть отзывы ▴';
+            if (collapsed) box.scrollTop = 0;
+        }
 
     </script>
 </body>

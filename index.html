@@ -311,15 +311,15 @@
             } else load();
         })();
 
-        // Свернуть/развернуть отзывы на главной
+        // Свернуть/развернуть отзывы на главной (с плавной анимацией высоты)
         function toggleHomeReviews() {
             const box = document.getElementById('tg-reviews-home');
             const fade = document.getElementById('tg-reviews-fade');
             const btn = document.getElementById('tg-reviews-toggle');
             const collapsed = box.classList.toggle('collapsed');
-            fade.style.display = collapsed ? '' : 'none';
+            fade.classList.toggle('hidden', !collapsed);
             btn.innerText = collapsed ? 'Развернуть отзывы ▾' : 'Свернуть отзывы ▴';
-            if (collapsed) box.scrollTop = 0;
+            if (collapsed) box.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
     </script>

@@ -117,7 +117,11 @@ input:-webkit-autofill:active {
     transition: border-color 0.3s;
 }
 .tg-reviews-card:hover { border-color: #ff7eb3; }
-#tg-reviews-home { min-height: 120px; border-radius: 12px; overflow: hidden; }
+#tg-reviews-home {
+    min-height: 120px; border-radius: 12px; overflow: hidden;
+    /* Плавный разворот/сворачивание (разовая анимация по клику — FPS не грузит) */
+    transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
 #tg-reviews-home.collapsed { max-height: 380px; }
 #tg-reviews-home:not(.collapsed) { max-height: 70vh; overflow-y: auto; }
 #tg-reviews-home:not(.collapsed)::-webkit-scrollbar { width: 4px; }
@@ -128,7 +132,9 @@ input:-webkit-autofill:active {
     position: absolute; left: 1px; right: 1px; bottom: 52px; height: 90px;
     background: linear-gradient(to bottom, transparent, #17121e 92%);
     pointer-events: none; border-radius: 0 0 12px 12px;
+    transition: opacity 0.35s;
 }
+.tg-reviews-fade.hidden { opacity: 0; }
 .tg-reviews-toggle {
     position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
     padding: 9px 22px; border-radius: 20px; cursor: pointer;

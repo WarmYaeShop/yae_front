@@ -158,13 +158,13 @@
             <div class="warning-text" style="margin-top:8px;">⚠️ Менеджер свяжется с вами для получения кода.</div>
         </div>
 
-        <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; background: rgba(30, 25, 38, 0.6); padding: 12px 15px; border-radius: 12px; border: 1px solid #3a2b4d; transition: 0.3s;" onmouseover="this.style.borderColor='#ff7eb3'" onmouseout="this.style.borderColor='#3a2b4d'">
+        <label class="urgent-label" style="display: flex; align-items: center; gap: 12px; cursor: pointer; background: rgba(30, 25, 38, 0.6); padding: 12px 15px; border-radius: 12px; border: 1px solid #3a2b4d; transition: border-color 0.2s;">
             
             <div style="position: relative; width: 22px; height: 22px; flex-shrink: 0;">
-                <input type="checkbox" id="urgent-checkbox" style="opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; z-index: 2; margin: 0;" onchange="document.getElementById('custom-check').style.background = this.checked ? '#ff7eb3' : 'transparent'; document.getElementById('custom-check-icon').style.opacity = this.checked ? '1' : '0';">
+                <input type="checkbox" id="urgent-checkbox" style="opacity: 0; position: absolute; width: 100%; height: 100%; cursor: pointer; z-index: 2; margin: 0;" onchange="const c=document.getElementById('custom-check'),i=document.getElementById('custom-check-icon');c.style.background=this.checked?'#ff7eb3':'transparent';i.style.opacity=this.checked?'1':'0';i.style.transform=this.checked?'scale(1)':'scale(0.4)';">
                 
-                <div id="custom-check" style="width: 22px; height: 22px; border: 2px solid #ff7eb3; border-radius: 6px; background: transparent; transition: 0.2s; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
-                    <svg id="custom-check-icon" style="opacity: 0; transition: 0.2s;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <div id="custom-check" style="width: 22px; height: 22px; border: 2px solid #ff7eb3; border-radius: 6px; background: transparent; transition: background 0.12s; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+                    <svg id="custom-check-icon" style="opacity: 0; transform: scale(0.4); transition: opacity 0.12s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
             </div>
 
@@ -327,7 +327,12 @@
         }
 
         function flyToCart(button) {
-            const header = document.getElementById('cart-header');
+            // Корзина за экраном (телефон) — лепесток летит к плавающей кнопке корзины
+            let header = document.getElementById('cart-header');
+            const hr = header ? header.getBoundingClientRect() : null;
+            const offscreen = !hr || hr.bottom < 0 || hr.top > window.innerHeight;
+            const fab = document.getElementById('cart-float-btn');
+            if (offscreen && fab) header = fab;
             const b = button.getBoundingClientRect(); const h = header.getBoundingClientRect();
             const p = document.createElement('div'); p.classList.add('flying-cart-petal'); document.body.appendChild(p);
             p.style.left = (b.left + b.width/2) + 'px'; p.style.top = (b.top + b.height/2) + 'px';

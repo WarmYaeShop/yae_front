@@ -944,7 +944,13 @@ function initFloatingCartBtn() {
     btn.innerHTML = '<span class="cfb-icon">🛒</span><span class="cfb-sum" id="cfb-sum-text">0 ₽</span>';
     btn.addEventListener('click', () => {
         const cart = document.querySelector('.cart-right');
-        if (cart) cart.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (!cart) return;
+        // Скроллим так, чтобы верх корзины оказался сразу под липкой шапкой
+        // (scrollIntoView на телефоне промахивался ниже корзины)
+        const head = document.querySelector('header');
+        const offset = (head ? head.offsetHeight : 0) + 12;
+        const y = cart.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
     });
     document.body.appendChild(btn);
 
@@ -1080,6 +1086,9 @@ async function applySiteContent() {
                 </div></div>
             </div>`).join('');
     }
+    // Предзаказы Genshin (галочка в корзине; включается в боте — /preorder)
+    const preorderBox = document.getElementById('preorder-box');
+    if (preorderBox) preorderBox.style.display = c.preorder_genshin ? 'flex' : 'none';
     // Контакты/ссылки (на всех страницах — в шапке/футере/модалках)
     if (c.tg_channel) document.querySelectorAll('.js-tg-channel').forEach(a => { a.href = c.tg_channel; });
     if (c.support_operator) document.querySelectorAll('.js-support-op').forEach(a => { a.href = c.support_operator; });

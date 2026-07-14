@@ -174,12 +174,18 @@
             </div>
             <div class="game-card" onclick="goToPage('/zzz')">
                 <div class="game-icon-container"><img src="images/zzz.png" alt="ZZZ"></div>
-                <div class="game-name">ZZZ</div>
+                <div class="game-name">Zenless Zone Zero</div>
             </div>
         </div>
 
         <div class="stats-bar" style="justify-content: center;">
             <div class="stat-cell" style="flex: 0 1 340px;"><div class="stat-num" id="stat-orders">5000+</div><div class="stat-lbl">заказов выполнено</div></div>
+        </div>
+
+        <div class="home-reviews">
+            <div class="section-title">Отзывы наших клиентов 💗</div>
+            <p class="home-reviews-sub">Реальные комментарии из нашего Telegram-канала</p>
+            <div id="tg-reviews-home"></div>
         </div>
 
         <div class="how-section">
@@ -250,7 +256,7 @@
             render(); reset();
         })();
 
-        // --- Живые счётчики ---
+        // --- Живой счётчик заказов: растёт с нуля, когда доскроллил до него ---
         (async function () {
             try {
                 const s = await (await fetch('/api/stats')).json();
@@ -258,15 +264,47 @@
                 const target = Number(s.orders);
                 // Если API не ответил числом — оставляем статичное "5000+" из HTML
                 if (!Number.isFinite(target) || target <= 0) return;
-                let cur = Math.max(0, target - 60);
-                const step = () => {
-                    cur += Math.ceil((target - cur) / 8);
-                    if (cur >= target) cur = target;
-                    oEl.innerText = cur.toLocaleString('ru-RU') + '+';
-                    if (cur < target) requestAnimationFrame(step);
+                const DURATION = 1800; // мс
+                const run = () => {
+                    const t0 = performance.now();
+                    const step = (now) => {
+                        const p = Math.min((now - t0) / DURATION, 1);
+                        const eased = 1 - Math.pow(1 - p, 3); // плавное торможение в конце
+                        oEl.innerText = Math.round(target * eased).toLocaleString('ru-RU') + '+';
+                        if (p < 1) requestAnimationFrame(step);
+                    };
+                    requestAnimationFrame(step);
                 };
-                step();
+                if ('IntersectionObserver' in window) {
+                    oEl.innerText = '0+';
+                    const io = new IntersectionObserver((entries) => {
+                        if (entries[0].isIntersecting) { io.disconnect(); run(); }
+                    }, { threshold: 0.6 });
+                    io.observe(oEl);
+                } else run();
             } catch (e) {}
+        })();
+
+        // --- Отзывы из Telegram на главной (грузим виджет, когда доскроллили) ---
+        (function () {
+            const box = document.getElementById('tg-reviews-home');
+            if (!box) return;
+            const load = () => {
+                if (box.querySelector('iframe, script')) return;
+                const script = document.createElement('script');
+                script.src = "https://telegram.org/js/telegram-widget.js?22";
+                script.setAttribute("data-telegram-discussion", "donatsgenshin/1363");
+                script.setAttribute("data-comments-limit", "10");
+                script.setAttribute("data-dark", "1");
+                script.async = true;
+                box.appendChild(script);
+            };
+            if ('IntersectionObserver' in window) {
+                const io = new IntersectionObserver((entries) => {
+                    if (entries[0].isIntersecting) { io.disconnect(); load(); }
+                }, { rootMargin: '400px' });
+                io.observe(box);
+            } else load();
         })();
 
     </script>

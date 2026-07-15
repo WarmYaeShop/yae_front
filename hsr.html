@@ -404,7 +404,9 @@
             }, 800);
         }
 
+        let checkoutBusy = false; // защита от двойного клика по «Перейти к оплате»
         async function checkout() {
+            if (checkoutBusy) return;
             if (Object.keys(cart).length === 0) { alert("Ваша корзина пуста! Добавьте хотя бы один товар."); return; }
             if (!document.getElementById('consent-input') || !document.getElementById('consent-input').checked) { alert("Пожалуйста, подтвердите согласие на обработку персональных данных."); return; }
             const contactInput = document.getElementById('contact-input').value;
@@ -452,19 +454,21 @@
                 promo_code: localStorage.getItem('promo_code_applied') || ''
             };
 
-            const btn = document.querySelector('.checkout-btn:last-child');
-            const originalText = btn.innerText; btn.innerText = "Создание платежа ⏳..."; btn.disabled = true;
+            checkoutBusy = true;
+            const btn = document.querySelector('#step-details .checkout-btn');
+            const originalText = btn.innerText;
+            btn.classList.add('btn-loading'); btn.innerText = 'Создаём ссылку на оплату'; btn.disabled = true;
 
             try {
                 const response = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await response.json();
                 if (data.status === 'success') {
                     localStorage.removeItem('promo_code_applied'); // промокод потрачен
-                    if (data.payment_url) { window.location.href = data.payment_url; } else { showOrderSuccess(currentMethod); cart = {}; updateCartUI(); prevStep(); btn.innerText = originalText; btn.disabled = false; }
+                    if (data.payment_url) { window.location.href = data.payment_url; } else { showOrderSuccess(currentMethod); cart = {}; updateCartUI(); prevStep(); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false; }
                 } else {
-                    alert("Ошибка платежной системы: " + data.message); btn.innerText = originalText; btn.disabled = false;
+                    alert("Ошибка платежной системы: " + data.message); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false;
                 }
-            } catch (err) { alert("Ошибка при соединении с сервером."); btn.innerText = originalText; btn.disabled = false; }
+            } catch (err) { alert("Ошибка при соединении с сервером."); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false; }
         }
 
         document.addEventListener('DOMContentLoaded', fetchPrices);

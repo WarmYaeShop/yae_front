@@ -2,6 +2,21 @@
    СТИЛИ СТРАНИЦ ИГР — подключается на genshin/hsr/wuwa/zzz
    ============================================= */
 
+/* Кнопка «Перейти к оплате» в момент создания платежа: остаётся яркой,
+   показывает вращающийся спиннер, повторные клики игнорируются (checkoutBusy) */
+.checkout-btn.btn-loading:disabled {
+    background: linear-gradient(90deg, #ff4dff, #b300b3);
+    color: #fff; opacity: 0.9; cursor: wait;
+    box-shadow: 0 5px 15px rgba(255, 77, 255, 0.3);
+}
+.checkout-btn.btn-loading::after {
+    content: ''; display: inline-block; width: 15px; height: 15px;
+    margin-left: 10px; vertical-align: -2px; border-radius: 50%;
+    border: 2.5px solid rgba(255, 255, 255, 0.35); border-top-color: #fff;
+    animation: btn-spin 0.7s linear infinite;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
 /* На тач-экранах тап «залипает» в :hover — карточка прыгала и оставалась приподнятой.
    Двойной класс = выше специфичность, перебивает и inline-стили страниц. */
 @media (hover: none) {

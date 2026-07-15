@@ -87,6 +87,25 @@ function reorderById(id) {
     if (typeof items === 'string') { try { items = JSON.parse(items); } catch (e) { items = {}; } }
     reorder(o.game, o.method, items);
 }
+// «Оплатить» в истории заказов: свежая ссылка на оплату для заказов,
+// которые ждут оплаты или завершились ошибкой (старая ссылка могла протухнуть)
+async function repayOrder(id, btn) {
+    if (btn) { btn.disabled = true; btn.innerText = 'Создаём ссылку на оплату…'; }
+    try {
+        const res = await fetch('/api/orders/repay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: id })
+        });
+        const data = await res.json();
+        if (data.payment_url) { window.location.href = data.payment_url; return; }
+        toast(data.message || data.detail || 'Не удалось создать ссылку на оплату', 'error');
+    } catch (e) {
+        toast('Ошибка соединения. Попробуйте ещё раз', 'error');
+    }
+    if (btn) { btn.disabled = false; btn.innerText = '💳 Оплатить'; }
+}
+
 // Вызывается на странице игры: возвращает данные повтора, если они для этой игры
 function consumeReorder(gameName) {
     try {
@@ -150,7 +169,8 @@ async function refreshOrdersList() {
                 if (o.status === 'Оплачен' || o.status === 'Выполнен') statusColor = '#4dff88';
                 if (o.status === 'Ожидает оплаты' || o.status === 'В обработке') statusColor = '#ffcc00';
                 if (o.status === 'Ошибка оплаты' || o.status === 'Отменен') statusColor = '#ff4d4d';
-                const canReorder = REORDER_PAGES[o.game] && o.items && Object.keys(o.items).length;
+                const canPay = o.status === 'Ожидает оплаты' || o.status === 'Ошибка оплаты';
+                const canReorder = !canPay && REORDER_PAGES[o.game] && o.items && Object.keys(o.items).length;
 
                 container.innerHTML += `
                     <div style="background: rgba(20, 15, 25, 0.8); border: 1px solid #3a2b4d; border-radius: 12px; padding: 15px; margin-bottom: 10px; transition: 0.3s;" onmouseover="this.style.borderColor='#ff7eb3'" onmouseout="this.style.borderColor='#3a2b4d'">
@@ -164,6 +184,7 @@ async function refreshOrdersList() {
                             </div>
                         </div>
                         ${orderTrackerHTML(o.status)}
+                        ${canPay ? `<button onclick="repayOrder(${o.id}, this)" style="margin-top: 12px; width: 100%; background: linear-gradient(90deg, #ff4dff, #b300b3); border: none; color: #fff; padding: 10px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 77, 255, 0.25);">💳 Оплатить</button>` : ''}
                         ${canReorder ? `<button onclick="reorderById(${o.id})" style="margin-top: 12px; width: 100%; background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3; padding: 9px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,126,179,0.12)'" onmouseout="this.style.background='transparent'">🔁 Заказать снова</button>` : ''}
                     </div>
                 `;

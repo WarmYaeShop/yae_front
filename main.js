@@ -1111,6 +1111,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const refParam = new URLSearchParams(location.search).get('ref');
     if (refParam) localStorage.setItem('ref_code', refParam.slice(0, 50));
 
+    // Возврат с оплаты (success_url/fail_url платёжной системы: ?paid=success|fail)
+    const paidParam = new URLSearchParams(location.search).get('paid');
+    if (paidParam) {
+        history.replaceState(null, '', location.pathname); // чистим ?paid из адреса
+        if (paidParam === 'success') {
+            // Заказ оплачен — сохранённые корзины и промокод больше не нужны
+            ['Genshin Impact', 'Honkai: Star Rail', 'Wuthering Waves', 'Zenless Zone Zero']
+                .forEach(g => localStorage.removeItem('saved_cart_' + g));
+            localStorage.removeItem('promo_code_applied');
+            const txt = document.getElementById('order-success-text');
+            if (txt) txt.innerHTML = 'Оплата прошла успешно, заказ уже у менеджера! Пополнение по <b>UID</b> приходит в течение 15 минут, по входу — <b>15–30 минут</b> 💫';
+            showModal('order-success-modal');
+            const check = document.querySelector('#order-success-modal .success-check');
+            if (check) { check.classList.remove('play'); void check.offsetWidth; check.classList.add('play'); }
+        } else if (paidParam === 'fail') {
+            toast('😔 Оплата не прошла. Попробуйте ещё раз — корзина сохранена. Если что, мы на связи в поддержке 💜', 'error');
+        }
+    }
+
     const savedUser = localStorage.getItem('tg_user') || localStorage.getItem('email_user');
     if (savedUser) showUserProfile(JSON.parse(savedUser));
     initCheckoutReferral();

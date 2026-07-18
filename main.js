@@ -201,27 +201,50 @@ async function refreshOrdersList() {
 }
 
 // --- ЛОГИКА ОТЗЫВОВ ---
-// --- ЛОГИКА ОТЗЫВОВ ---
+// Отзывы приходят с НАШЕГО сервера (/api/reviews — кэш комментариев из ТГ):
+// Telegram в РФ замедлен, и виджет у посетителей без VPN не грузится.
+// Если сервер ничего не отдал — фолбэк на виджет Telegram.
+function _tgWidgetFallback(container) {
+    container.innerHTML = '';
+    const script = document.createElement('script');
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.setAttribute("data-telegram-discussion", "donatsgenshin/1363");
+    script.setAttribute("data-comments-limit", "10");
+    script.setAttribute("data-dark", "1");
+    script.async = true;
+    container.appendChild(script);
+}
+async function renderTgReviews(container) {
+    try {
+        const data = await (await fetch('/api/reviews')).json();
+        const list = (data.reviews || []).slice(0, 30);
+        if (!list.length) { _tgWidgetFallback(container); return; }
+        container.innerHTML = list.map(r => {
+            const name = (r.author || 'Гость').trim() || 'Гость';
+            let date = '';
+            try {
+                if (r.date) date = new Date(r.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+            } catch (e) {}
+            return `<div class="rv-item">
+                <div class="rv-ava">${_escHtml(name.charAt(0).toUpperCase())}</div>
+                <div class="rv-body">
+                    <div class="rv-name">${_escHtml(name)}</div>
+                    <div class="rv-text">${_escHtml(r.text)}</div>
+                    ${date ? `<div class="rv-date">${_escHtml(date)}</div>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    } catch (e) {
+        _tgWidgetFallback(container);
+    }
+}
 function openReviewsModal() {
     showModal('reviews-modal');
     const container = document.getElementById('reviews-list');
-    if (container.querySelector('iframe')) return;
-    
-    container.innerHTML = '<div style="text-align:center; color:#a097b0; padding: 30px;">⏳ Загрузка реальных отзывов из Telegram...</div>';
-    
-    setTimeout(() => {
-        container.innerHTML = '';
-        const script = document.createElement('script');
-        script.src = "https://telegram.org/js/telegram-widget.js?22";
-        
-        // Вот здесь вставлен твой новый пост (donatsgenshin/1363)
-        script.setAttribute("data-telegram-discussion", "donatsgenshin/1363"); 
-        
-        script.setAttribute("data-comments-limit", "10");
-        script.setAttribute("data-dark", "1");
-        script.async = true;
-        container.appendChild(script);
-    }, 400);
+    if (container.dataset.loaded) return;
+    container.dataset.loaded = '1';
+    container.innerHTML = '<div style="text-align:center; color:#a097b0; padding: 30px;">⏳ Загрузка отзывов...</div>';
+    renderTgReviews(container);
 }
 
 // --- ЧАСЫ РАБОТЫ ---

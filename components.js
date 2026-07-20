@@ -153,7 +153,15 @@ function renderHeader(isGamePage = false) {
                     <div style="display:flex; justify-content:center; min-height: 48px;">
                         <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="YaeDonateShop_Bot" data-size="large" data-radius="10" data-onauth="onTelegramAuth(user)"></script>
                     </div>
-                    <p class="auth-hint">Кнопка появится на рабочем домене (на localhost Telegram её прячет).</p>
+                    <!-- Подсказка только для локальной разработки: на боевом домене
+                         кнопка Telegram работает, и напоминание клиентам ни к чему -->
+                    <p class="auth-hint" style="display:none;" id="tg-login-hint">Кнопка появится на рабочем домене (на localhost Telegram её прячет).</p>
+                    <script>
+                        if (['localhost', '127.0.0.1'].indexOf(location.hostname) !== -1) {
+                            var _h = document.getElementById('tg-login-hint');
+                            if (_h) _h.style.display = '';
+                        }
+                    </script>
                 </div>
 
                 <div class="auth-privacy">Входя, вы соглашаетесь с <a href="/privacy" target="_blank">политикой конфиденциальности</a></div>

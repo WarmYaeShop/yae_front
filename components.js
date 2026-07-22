@@ -1,3 +1,44 @@
+// === Картинки с CDN ===
+// Картинки, заменённые админом через бота, лежат на CDN (контейнеры на сервере
+// эфемерны — файлы там не хранятся). Сервер отдаёт карту {файл: ссылка} по
+// /api/images; здесь подменяем локальные images/<файл> на ссылку CDN — и у уже
+// вставленных <img>, и у создаваемых динамически (карточки товаров).
+(function () {
+    window.__imgMap = {};
+    function fnameFromSrc(src) {
+        var m = src && src.match(/images\/([^"'?)\s]+\.(?:webp|png|jpg|jpeg))/i);
+        return m ? m[1] : null;
+    }
+    function swap(img) {
+        if (!img || img.tagName !== 'IMG' || img.dataset.cdnDone) return;
+        var name = fnameFromSrc(img.getAttribute('src') || '');
+        if (name && window.__imgMap[name]) {
+            img.dataset.cdnDone = '1';
+            img.src = window.__imgMap[name];
+        }
+    }
+    function sweep(root) {
+        if (!root || !root.querySelectorAll) return;
+        if (root.tagName === 'IMG') swap(root);
+        root.querySelectorAll('img').forEach(swap);
+    }
+    // Наблюдаем за появлением новых <img> (карточки товаров рисуются после fetch)
+    var mo = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+            var nodes = muts[i].addedNodes;
+            for (var j = 0; j < nodes.length; j++) {
+                if (nodes[j].nodeType === 1) sweep(nodes[j]);
+            }
+        }
+    });
+    try { mo.observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+    fetch('/api/images').then(function (r) { return r.json(); }).then(function (d) {
+        window.__imgMap = (d && d.images) || {};
+        sweep(document);
+    }).catch(function () {});
+    document.addEventListener('DOMContentLoaded', function () { sweep(document); });
+})();
+
 function renderHeader(isGamePage = false) {
     let backBtnHTML = isGamePage ? `<a href="#" onclick="goToPage('/'); return false;" style="color: #d8c3e0; text-decoration: none; font-weight: bold; font-size: 16px; margin-right: 20px; transition: 0.3s; display: flex; align-items: center; z-index: 150;">← Назад</a>` : '';
 

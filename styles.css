@@ -385,7 +385,7 @@ body::before {
 #sakura-tree {
     position: fixed; top: -30px; left: -30px;
     width: 550px; height: 450px;
-    background-image: url('images/sakura_tree.webp');
+    background-image: url('static/sakura_tree.webp');
     background-size: contain; background-repeat: no-repeat; background-position: left top;
     z-index: 1; pointer-events: none;
     /* drop-shadow убран: фильтр на большой анимированной картинке пересчитывался каждый кадр */

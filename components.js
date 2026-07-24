@@ -15,10 +15,11 @@
         var name = fnameFromSrc(localSrc);
         if (name && window.__imgMap[name]) {
             img.dataset.cdnDone = '1';
-            // Если CDN-ссылка не загрузится — возвращаем локальную картинку
-            // (для дефолтных она есть в репо). Сайт не ломается при любом CDN.
-            img.onerror = function () { img.onerror = null; img.src = localSrc; };
-            img.src = window.__imgMap[name];
+            var target = window.__imgMap[name];
+            // /api/images отдаёт относительный images/<файл> — reverse-proxy сам
+            // проксирует его на CDN. Если путь совпадает с текущим — не трогаем.
+            if (target === localSrc) return;
+            img.src = target;
         }
     }
     function sweep(root) {

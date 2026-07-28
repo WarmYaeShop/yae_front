@@ -1,8 +1,9 @@
-// === Картинки с CDN ===
-// Картинки, заменённые админом через бота, лежат на CDN (контейнеры на сервере
-// эфемерны — файлы там не хранятся). Сервер отдаёт карту {файл: ссылка} по
-// /api/images; здесь подменяем локальные images/<файл> на ссылку CDN — и у уже
-// вставленных <img>, и у создаваемых динамически (карточки товаров).
+// === Картинки из БД ===
+// Картинки, заменённые админом через бота, хранятся в БД и отдаются бэкендом
+// (/api/image/<файл>). Сервер отдаёт карту {файл: ссылка?v=версия} по
+// /api/images; здесь подменяем локальные images/<файл> на эту ссылку — и у уже
+// вставленных <img>, и у создаваемых динамически (карточки товаров). Версия в
+// ссылке меняется при перезаливке, поэтому обновлённая картинка видна сразу.
 (function () {
     window.__imgMap = {};
     function fnameFromSrc(src) {
@@ -37,10 +38,20 @@
         }
     });
     try { mo.observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
-    fetch('/api/images').then(function (r) { return r.json(); }).then(function (d) {
-        window.__imgMap = (d && d.images) || {};
-        sweep(document);
-    }).catch(function () {});
+    // Загружаем карту картинок с повтором: разовый сбой (напр. холодный старт
+    // бэкенда) не должен оставить картинки неподменёнными
+    function loadImgMap(attempt) {
+        fetch('/api/images').then(function (r) {
+            if (!r.ok) throw new Error(r.status);
+            return r.json();
+        }).then(function (d) {
+            window.__imgMap = (d && d.images) || {};
+            sweep(document);
+        }).catch(function () {
+            if (attempt < 3) setTimeout(function () { loadImgMap(attempt + 1); }, 1500);
+        });
+    }
+    loadImgMap(1);
     document.addEventListener('DOMContentLoaded', function () { sweep(document); });
 })();
 

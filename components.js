@@ -219,19 +219,10 @@ function renderHeader(isGamePage = false) {
                 </div>
 
                 <div id="auth-pane-tg" class="auth-pane" style="display:none;">
-                    <p style="color: #d8c3e0; font-size: 13px; text-align: center; margin: 4px 0 16px;">Быстрый вход в один клик</p>
-                    <div style="display:flex; justify-content:center; min-height: 48px;">
-                        <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="YaeDonateShop_Bot" data-size="large" data-radius="10" data-onauth="onTelegramAuth(user)"></script>
-                    </div>
-                    <!-- Подсказка только для локальной разработки: на боевом домене
-                         кнопка Telegram работает, и напоминание клиентам ни к чему -->
-                    <p class="auth-hint" style="display:none;" id="tg-login-hint">Кнопка появится на рабочем домене (на localhost Telegram её прячет).</p>
-                    <script>
-                        if (['localhost', '127.0.0.1'].indexOf(location.hostname) !== -1) {
-                            var _h = document.getElementById('tg-login-hint');
-                            if (_h) _h.style.display = '';
-                        }
-                    </script>
+                    <p style="color: #d8c3e0; font-size: 13px; text-align: center; margin: 4px 0 16px;">Вход через нашего бота — работает всегда, даже без VPN</p>
+                    <button onclick="startTgLogin(this)" class="auth-btn-primary" id="tg-login-btn">✈️ Войти через Telegram</button>
+                    <div id="tg-login-status" class="auth-msg" style="text-align:center;"></div>
+                    <p class="auth-hint">Откроется наш бот — нажмите в нём «Старт», и вход выполнится автоматически 🌸</p>
                 </div>
 
                 <div class="auth-privacy">Входя, вы соглашаетесь с <a href="/privacy" target="_blank">политикой конфиденциальности</a></div>

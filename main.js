@@ -772,6 +772,49 @@ function onTelegramAuth(user) {
     fetch('/api/auth/telegram', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(user) })
     .then(res => res.json()).then(data => { if(data.status==='success'){ localStorage.setItem('tg_user', JSON.stringify(user)); if(data.token) localStorage.setItem('session_token', data.token); location.reload(); }});
 }
+
+// Вход через бота: создаём код, открываем бота, опрашиваем статус.
+// Надёжно в РФ (не трогает oauth.telegram.org, который замедлен).
+let _tgLoginTimer = null;
+async function startTgLogin(btn) {
+    const status = document.getElementById('tg-login-status');
+    const reset = () => { if (btn) { btn.disabled = false; btn.innerHTML = '✈️ Войти через Telegram'; } };
+    // Окно открываем СИНХРОННО (до await) — иначе блокировщик всплывашек не пустит
+    let win = null;
+    try { win = window.open('', '_blank'); } catch (e) {}
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Открываем Telegram…'; }
+    try {
+        const data = await (await fetch('/api/auth/tg_start', { method: 'POST' })).json();
+        if (!data.link || !data.code) throw new Error();
+        if (win) win.location.href = data.link; else window.location.href = data.link;
+        if (status) status.innerHTML = 'В Telegram нажмите «Старт». Ждём подтверждения…<br><a href="' + data.link + '" target="_blank" style="color:#ff7eb3;">Не открылось? Нажмите сюда</a>';
+        clearInterval(_tgLoginTimer);
+        let tries = 0;
+        _tgLoginTimer = setInterval(async () => {
+            if (++tries > 60) { clearInterval(_tgLoginTimer); if (status) status.innerText = '⌛ Время вышло. Нажмите кнопку ещё раз.'; reset(); return; }
+            // окно входа закрыли — прекращаем опрос
+            if (!document.getElementById('auth-modal').classList.contains('active')) { clearInterval(_tgLoginTimer); return; }
+            try {
+                const pd = await (await fetch('/api/auth/tg_poll?code=' + encodeURIComponent(data.code))).json();
+                if (pd.status === 'authorized' && pd.token) {
+                    clearInterval(_tgLoginTimer);
+                    localStorage.setItem('tg_user', JSON.stringify(pd.user || {}));
+                    localStorage.setItem('session_token', pd.token);
+                    if (status) status.innerText = '✅ Вход выполнен!';
+                    location.reload();
+                } else if (pd.status === 'expired') {
+                    clearInterval(_tgLoginTimer);
+                    if (status) status.innerText = '⚠️ Ссылка устарела. Нажмите кнопку ещё раз.';
+                    reset();
+                }
+            } catch (e) {}
+        }, 2000);
+    } catch (e) {
+        if (win) try { win.close(); } catch (_) {}
+        if (status) status.innerText = '❌ Не удалось начать вход. Попробуйте ещё раз.';
+        reset();
+    }
+}
 // Подсветка кнопки профиля, когда пользователь вошёл
 function showUserProfile(user) {
     const btn = document.getElementById('profile-btn-icon');

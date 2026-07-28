@@ -152,13 +152,23 @@ input:-webkit-autofill:active {
     transition: opacity 0.35s;
 }
 .tg-reviews-fade.hidden { opacity: 0; }
-.tg-reviews-toggle {
+/* Ряд кнопок под отзывами: свернуть/развернуть + ссылка на пост */
+.tg-reviews-actions {
     position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
-    padding: 9px 22px; border-radius: 20px; cursor: pointer;
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;
+    width: max-content; max-width: calc(100% - 28px);
+}
+.tg-reviews-toggle, .tg-reviews-link {
+    padding: 9px 20px; border-radius: 20px; cursor: pointer;
     background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3;
     font-weight: bold; font-size: 13px; transition: 0.25s; white-space: nowrap;
+    text-decoration: none; display: inline-flex; align-items: center;
 }
 .tg-reviews-toggle:hover { background: rgba(255, 126, 179, 0.15); box-shadow: 0 0 14px rgba(255, 126, 179, 0.35); color: #fff; }
+/* Ссылка на пост — акцентная (заполненная), чтобы выделялась */
+.tg-reviews-link { background: linear-gradient(90deg, #ff4dff, #b300b3); border-color: transparent; color: #fff; box-shadow: 0 4px 14px rgba(179, 0, 179, 0.3); }
+.tg-reviews-link:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(179, 0, 179, 0.5); }
+.tg-reviews-link:active { transform: scale(0.96); }
 
 .how-section { max-width: 1000px; margin: 70px auto 0; }
 .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 30px; }

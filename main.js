@@ -217,7 +217,9 @@ function _tgWidgetFallback(container) {
 async function renderTgReviews(container) {
     try {
         const data = await (await fetch('/api/reviews')).json();
-        const list = (data.reviews || []).slice(0, 30);
+        // Telegram отдаёт комментарии по возрастанию даты — переворачиваем,
+        // чтобы новые отзывы были сверху
+        const list = (data.reviews || []).slice().reverse().slice(0, 30);
         if (!list.length) { _tgWidgetFallback(container); return; }
         container.innerHTML = list.map(r => {
             const name = (r.author || 'Гость').trim() || 'Гость';

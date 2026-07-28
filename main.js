@@ -558,16 +558,25 @@ function animateNumber(el, to, suffix = ' ₽') {
 
 // --- 3D-НАКЛОН КАРТОЧЕК ИГР ЗА МЫШКОЙ ---
 function initCardTilt() {
+    // 3D-наклон только на устройствах с настоящей мышью (тач не наклоняем)
+    if (!window.matchMedia || !window.matchMedia('(hover: hover)').matches) return;
     document.querySelectorAll('.game-card').forEach(card => {
+        let raf = null, lastE = null;
         card.addEventListener('mousemove', e => {
             if (document.body.classList.contains('low-end-mode')) return;
-            const r = card.getBoundingClientRect();
-            const x = (e.clientX - r.left) / r.width - 0.5;
-            const y = (e.clientY - r.top) / r.height - 0.5;
-            card.style.transition = 'transform 0.08s ease';
-            card.style.transform = `perspective(700px) rotateY(${x * 12}deg) rotateX(${-y * 12}deg) translateY(-8px) scale(1.03)`;
+            lastE = e;
+            if (raf) return; // не чаще одного апдейта на кадр
+            raf = requestAnimationFrame(() => {
+                raf = null;
+                const r = card.getBoundingClientRect();
+                const x = (lastE.clientX - r.left) / r.width - 0.5;
+                const y = (lastE.clientY - r.top) / r.height - 0.5;
+                card.style.transition = 'transform 0.08s ease';
+                card.style.transform = `perspective(700px) rotateY(${x * 12}deg) rotateX(${-y * 12}deg) translateY(-8px) scale(1.03)`;
+            });
         });
         card.addEventListener('mouseleave', () => {
+            if (raf) { cancelAnimationFrame(raf); raf = null; }
             card.style.transition = 'transform 0.4s ease';
             card.style.transform = '';
         });

@@ -1024,9 +1024,15 @@ function initFloatingCartBtn() {
     updateBtn();
 }
 
-// --- PWA: регистрация service worker (установка как приложение) ---
+// Service Worker отключён (ломал сайт в Safari null-ответом). Снимаем любой
+// ранее установленный SW и чистим его кэши — чтобы у всех сайт работал напрямую.
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
+    navigator.serviceWorker.getRegistrations()
+        .then((regs) => regs.forEach((r) => r.unregister()))
+        .catch(() => {});
+    if (window.caches && caches.keys) {
+        caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+    }
 }
 
 // --- «Запомнить мои данные» (контакт + UID, только локально в браузере) ---

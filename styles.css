@@ -775,12 +775,9 @@ body.low-end-mode .how-card::after { display: none; }
     * { scroll-behavior: auto; }
 }
 
-/* Секции ниже сгиба не рендерятся, пока не доскроллил — экономит верстку/пейнт.
-   contain-intrinsic-size — примерная высота, чтобы скролл не прыгал. */
-.how-section, .faq-section, .home-reviews {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 600px;
-}
+/* (content-visibility убран: на планшете вызывал дёрганье липкой шапки при
+   скролле — рефлоу от рендера/схлопывания секций. Прирост FPS дало снятие
+   mix-blend у зерна, этого достаточно.) */
 
 /* --- Разделители секций: тонкие линии по бокам заголовка --- */
 .section-title::before, .section-title::after {

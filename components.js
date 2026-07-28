@@ -55,6 +55,19 @@
     document.addEventListener('DOMContentLoaded', function () { sweep(document); });
 })();
 
+// Слой «зерна» поверх фона (премиум-полировка) — вставляем один раз на всех
+// страницах, чтобы не дублировать в каждом HTML. Стили — #fx-grain в styles.css
+(function () {
+    function addGrain() {
+        if (document.getElementById('fx-grain')) return;
+        var g = document.createElement('div');
+        g.id = 'fx-grain';
+        document.body.appendChild(g);
+    }
+    if (document.body) addGrain();
+    else document.addEventListener('DOMContentLoaded', addGrain);
+})();
+
 function renderHeader(isGamePage = false) {
     let backBtnHTML = isGamePage ? `<a href="#" onclick="goToPage('/'); return false;" style="color: #d8c3e0; text-decoration: none; font-weight: bold; font-size: 16px; margin-right: 20px; transition: 0.3s; display: flex; align-items: center; z-index: 150;">← Назад</a>` : '';
 

@@ -1191,3 +1191,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initCardTilt();
     initFloatingCartBtn();
 });
+// Пульс карточки товара розовым свечением при добавлении в корзину (премиум-микро)
+document.addEventListener('click', function (e) {
+    var btn = e.target && e.target.closest ? e.target.closest('.buy-btn') : null;
+    if (!btn || btn.classList.contains('minus-btn')) return;
+    var card = btn.closest('.product-card');
+    if (!card) return;
+    card.classList.remove('cart-pulse');
+    void card.offsetWidth; // перезапуск анимации
+    card.classList.add('cart-pulse');
+    setTimeout(function () { card.classList.remove('cart-pulse'); }, 600);
+});

@@ -321,3 +321,35 @@ body.low-end-mode .prod-grid .product-card { animation: none; }
 }
 .form-container { display: none; opacity: 0; }
 .form-container.active { display: block; opacity: 1; }
+
+/* ============================================================
+   ✨ ПРЕМИУМ-ПОЛИРОВКА карточек товаров
+   ============================================================ */
+/* Градиентная рамка (розовеет на hover) + глянцевый шайн */
+.product-card {
+    overflow: hidden;
+    border: 1px solid transparent;
+    background:
+        linear-gradient(145deg, #1e1926, #15111c) padding-box,
+        linear-gradient(145deg, #3a2b4d, #2a2036) border-box;
+}
+.product-card:hover {
+    background:
+        linear-gradient(145deg, #1e1926, #15111c) padding-box,
+        linear-gradient(145deg, #ff7eb3, #b300b3) border-box;
+}
+.product-card::after {
+    content: ''; position: absolute; top: 0; left: 0; width: 55%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+    transform: translateX(-170%) skewX(-14deg); pointer-events: none; z-index: 1;
+}
+@media (hover: hover) {
+    .product-card:hover::after { transition: transform 0.75s ease; transform: translateX(280%) skewX(-14deg); }
+}
+/* Пульс свечением при добавлении в корзину */
+@keyframes cartPulse {
+    0%   { box-shadow: 0 10px 20px rgba(255, 126, 179, 0.3); }
+    40%  { box-shadow: 0 0 26px 6px rgba(255, 126, 179, 0.75); }
+    100% { box-shadow: 0 10px 20px rgba(255, 126, 179, 0.3); }
+}
+.product-card.cart-pulse { animation: cartPulse 0.55s ease-out; }

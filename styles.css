@@ -730,3 +730,54 @@ html { background: #14101d; }
     .close-modal-btn { margin: -12px -4px 0 8px; }
     .reviews-container { max-height: none; padding-right: 4px; }
 }
+
+/* ============================================================
+   ✨ ПРЕМИУМ-ПОЛИРОВКА — визуальные улучшения
+   Всё на transform/opacity + статичные слои: не грузит слабые ПК.
+   ============================================================ */
+
+/* --- Зерно + виньетка: убирают «полосатость» градиента, дают глубину --- */
+#fx-grain {
+    position: fixed; inset: 0; z-index: 40; pointer-events: none;
+    opacity: 0.05; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body::after {
+    content: ''; position: fixed; inset: 0; z-index: 41; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 38%, transparent 55%, rgba(8, 5, 14, 0.5) 100%);
+}
+/* Модалки и попапы — поверх виньетки/зерна, чтобы оставались чистыми */
+.modal-overlay, .side-menu, .cookie-banner, #toast-box { z-index: 2000; }
+
+/* --- Разделители секций: тонкие линии по бокам заголовка --- */
+.section-title::before, .section-title::after {
+    content: ''; height: 1px; flex: 1 1 auto; max-width: 130px; align-self: center;
+    background: linear-gradient(90deg, transparent, rgba(255, 126, 179, 0.55));
+}
+.section-title::after { background: linear-gradient(90deg, rgba(255, 126, 179, 0.55), transparent); }
+
+/* --- Пружинное нажатие кнопок --- */
+.header-btn:active, .buy-btn:active, .checkout-btn:active, .auth-btn-primary:active,
+.auth-btn-danger:active, .ref-copy-btn:active, .fx-btn:active, .side-menu-tg:active,
+.tg-reviews-toggle:active { transform: scale(0.96); }
+
+/* --- «Как это работает»: градиентная рамка + шайн при наведении --- */
+.how-card {
+    border: 1px solid transparent;
+    background:
+        linear-gradient(145deg, #1e1926, #15111c) padding-box,
+        linear-gradient(145deg, #3a2b4d, #2a2036) border-box;
+}
+.how-card:hover {
+    background:
+        linear-gradient(145deg, #1e1926, #15111c) padding-box,
+        linear-gradient(145deg, #ff7eb3, #b300b3) border-box;
+}
+.how-card::after {
+    content: ''; position: absolute; top: 0; left: 0; width: 55%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+    transform: translateX(-170%) skewX(-14deg); pointer-events: none; z-index: 2;
+}
+@media (hover: hover) {
+    .how-card:hover::after { transition: transform 0.75s ease; transform: translateX(280%) skewX(-14deg); }
+}

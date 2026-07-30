@@ -40,6 +40,12 @@
         
         .trust-badges { display: flex; justify-content: center; gap: 15px; margin-bottom: 60px; flex-wrap: wrap; }
         .badge { background: rgba(30, 25, 38, 0.8); border: 1px solid #ff7eb3; padding: 10px 20px; border-radius: 25px; font-size: 15px; color: #fff; font-weight: bold; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 15px rgba(255, 126, 179, 0.2); }
+        /* «Живые» плашки — мягкое покачивание волной (эмодзи оживают); транформа дешёвая для GPU */
+        .trust-badges .badge { animation: badgeFloat 3.2s ease-in-out infinite; will-change: transform; }
+        .trust-badges .badge:nth-child(2) { animation-delay: 1.05s; }
+        .trust-badges .badge:nth-child(3) { animation-delay: 2.1s; }
+        @keyframes badgeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        @media (prefers-reduced-motion: reduce) { .trust-badges .badge { animation: none; } }
 
         /* ИДЕАЛЬНОЕ ЦЕНТРИРОВАНИЕ КАРТОЧЕК ИГР */
         .game-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; }

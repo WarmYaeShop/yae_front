@@ -447,9 +447,10 @@ header {
 }
 .logo-container { display: flex; align-items: center; gap: 15px; }
 .logo-link {
-    font-family: 'Marck Script', cursive; font-size: 34px;
-    color: #ffffff; text-decoration: none;
-    text-shadow: 0 0 15px rgba(255, 119, 255, 0.8);
+    font-family: 'Marck Script', cursive; font-size: 35px;
+    color: #ffffff; text-decoration: none; letter-spacing: 0.6px;
+    /* Чёткая тёмная тень даёт контур буквам (тонкий курсив читается лучше) + мягкое свечение */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6), 0 0 14px rgba(255, 119, 255, 0.75);
     transition: 0.3s; z-index: 25; margin-right: 10px;
 }
 .header-btn {

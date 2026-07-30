@@ -816,3 +816,36 @@ body.low-end-mode .how-card::after { display: none; }
 @media (hover: hover) {
     .how-card:hover::after { transition: transform 0.75s ease; transform: translateX(280%) skewX(-14deg); }
 }
+
+/* ---------- Подарочные карты ---------- */
+.gift-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.gift-amt {
+    padding: 11px 4px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 14px;
+    background: rgba(255,126,179,0.10); border: 1px solid rgba(255,126,179,0.28); color: #ffe1f0;
+    transition: 0.2s;
+}
+.gift-amt:hover { background: rgba(255,126,179,0.22); }
+.gift-amt.active { background: linear-gradient(135deg, #ff7eb3, #b36eff); color: #fff; border-color: transparent; box-shadow: 0 4px 14px rgba(255,126,179,0.4); }
+@media (max-width: 460px) { .gift-amounts { grid-template-columns: repeat(2, 1fr); } }
+
+.gift-card {
+    position: relative; border-radius: 22px; overflow: hidden; margin-top: 4px;
+    background: linear-gradient(150deg, #efe7fb 0%, #f7e6f0 55%, #fbe8ef 100%);
+    box-shadow: 0 18px 46px rgba(150,110,180,0.4); padding: 22px 24px 20px; color: #4a2b53; text-align: left;
+}
+.gc-sakura { position: absolute; font-size: 50px; opacity: 0.9; filter: drop-shadow(0 4px 8px rgba(180,120,160,0.3)); }
+.gc-sakura.tr { top: -8px; right: -6px; transform: rotate(15deg); }
+.gc-sakura.bl { bottom: -14px; left: -10px; font-size: 40px; opacity: 0.5; transform: rotate(-10deg); }
+.gc-top { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 2; }
+.gc-brand { font-size: 15px; font-weight: 800; color: #c54f95; }
+.gc-label { font-size: 12px; color: #9385ad; font-weight: 600; }
+.gc-amount { font-size: 42px; font-weight: 800; color: #a23c86; margin: 12px 0 2px; position: relative; z-index: 2; text-shadow: 0 2px 6px rgba(200,110,170,0.25); }
+.gc-amount small { font-size: 22px; font-weight: 700; }
+.gc-sub { font-size: 13px; color: #8a6f9e; margin-bottom: 14px; position: relative; z-index: 2; }
+.gc-msg { font-size: 13px; color: #7a5f8e; font-style: italic; margin-bottom: 14px; position: relative; z-index: 2; }
+.gc-code-label { font-size: 11px; color: #9385ad; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; position: relative; z-index: 2; }
+.gc-code { margin-top: 6px; background: #fbf8ff; border: 2px dashed #e3b8d8; border-radius: 12px; padding: 12px; text-align: center; font-family: 'Consolas', monospace; font-size: 21px; font-weight: 800; letter-spacing: 3px; color: #7a2f6b; position: relative; z-index: 2; }
+.gc-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; position: relative; z-index: 2; }
+.gc-from { font-size: 13px; color: #6d5a7d; }
+.gc-from b { color: #a23c86; }
+.gc-fox { font-size: 28px; }

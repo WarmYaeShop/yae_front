@@ -77,6 +77,112 @@ function goToShop() {
     window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
+// ================= Подарочные карты =================
+let giftAmount = 1000;
+function openGiftModal() {
+    showModal('gift-modal');
+    switchGiftTab('buy');
+    const v = document.getElementById('gift-card-view'); if (v) { v.style.display = 'none'; v.innerHTML = ''; }
+    const tabs = document.querySelector('#gift-modal .auth-tabs'); if (tabs) tabs.style.display = '';
+}
+function switchGiftTab(t) {
+    document.getElementById('gift-tab-buy').classList.toggle('active', t === 'buy');
+    document.getElementById('gift-tab-redeem').classList.toggle('active', t === 'redeem');
+    document.getElementById('gift-pane-buy').style.display = t === 'buy' ? '' : 'none';
+    document.getElementById('gift-pane-redeem').style.display = t === 'redeem' ? '' : 'none';
+    const v = document.getElementById('gift-card-view'); if (v) v.style.display = 'none';
+}
+function giftPickAmount(el, amt) {
+    giftAmount = amt;
+    document.querySelectorAll('#gift-amounts .gift-amt').forEach(b => b.classList.remove('active'));
+    if (el) el.classList.add('active');
+    const c = document.getElementById('gift-amount-custom'); if (c) c.value = '';
+}
+function giftCustomAmount() {
+    const v = parseInt(document.getElementById('gift-amount-custom').value || '0');
+    document.querySelectorAll('#gift-amounts .gift-amt').forEach(b => b.classList.remove('active'));
+    if (v > 0) giftAmount = v;
+}
+async function giftCheckout(btn) {
+    if (!getSessionToken()) { showModal('auth-modal'); return; }
+    const msg = document.getElementById('gift-buy-msg');
+    if (!giftAmount || giftAmount < 100 || giftAmount > 50000) { msg.style.color = '#ff7eb3'; msg.innerText = 'Сумма подарка — от 100 до 50000 ₽'; return; }
+    const from = document.getElementById('gift-from').value.trim();
+    const message = document.getElementById('gift-message').value.trim();
+    const orig = btn.innerText; btn.disabled = true; btn.classList.add('btn-loading'); btn.innerText = 'Создаём ссылку...';
+    try {
+        const r = await fetch('/api/gift/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: giftAmount, from_name: from, message }) });
+        const d = await r.json();
+        if (d.status === 'success' && d.payment_url) {
+            localStorage.setItem('pending_gift', d.gift_id);
+            window.location.href = d.payment_url;
+            return;
+        }
+        msg.style.color = '#ff7eb3'; msg.innerText = d.detail || 'Не удалось создать оплату';
+    } catch (e) { msg.style.color = '#ff7eb3'; msg.innerText = 'Ошибка соединения с сервером'; }
+    btn.disabled = false; btn.classList.remove('btn-loading'); btn.innerText = orig;
+}
+async function giftRedeem(btn) {
+    if (!getSessionToken()) { showModal('auth-modal'); return; }
+    const code = (document.getElementById('gift-code-input').value || '').trim().toUpperCase();
+    const msg = document.getElementById('gift-redeem-msg');
+    if (!code) { msg.style.color = '#ff7eb3'; msg.innerText = 'Введите код подарка'; return; }
+    const orig = btn.innerText; btn.disabled = true; btn.classList.add('btn-loading'); btn.innerText = 'Проверяем...';
+    try {
+        const r = await fetch('/api/gift/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
+        const d = await r.json();
+        if (d.status === 'success') {
+            msg.style.color = '#4dff88';
+            msg.innerHTML = '✅ Подарок активирован! На баланс зачислено <b>' + Number(d.amount).toLocaleString('ru-RU') + ' ₽</b> — потратится на ваши заказы 🌸';
+            document.getElementById('gift-code-input').value = '';
+        } else { msg.style.color = '#ff7eb3'; msg.innerText = d.detail || 'Не удалось активировать код'; }
+    } catch (e) { msg.style.color = '#ff7eb3'; msg.innerText = 'Ошибка соединения с сервером'; }
+    btn.disabled = false; btn.classList.remove('btn-loading'); btn.innerText = orig;
+}
+function giftCopyCode(code) {
+    navigator.clipboard.writeText(code).then(() => { try { toast('Код скопирован 📋', 'success'); } catch (e) {} });
+}
+function renderGiftCard(d) {
+    document.getElementById('gift-pane-buy').style.display = 'none';
+    document.getElementById('gift-pane-redeem').style.display = 'none';
+    const tabs = document.querySelector('#gift-modal .auth-tabs'); if (tabs) tabs.style.display = 'none';
+    const from = d.from_name ? ('От <b>' + _escHtml(d.from_name) + '</b> с любовью 💜') : 'С любовью 💜';
+    const view = document.getElementById('gift-card-view');
+    view.style.display = '';
+    view.innerHTML =
+        '<div class="gift-card">' +
+        '<span class="gc-sakura tr">🌸</span><span class="gc-sakura bl">🌸</span>' +
+        '<div class="gc-top"><div class="gc-brand">🎁 Подарочная карта</div><div class="gc-label">Yae&nbsp;Shop</div></div>' +
+        '<div class="gc-amount">' + Number(d.amount).toLocaleString('ru-RU') + '<small> ₽</small></div>' +
+        '<div class="gc-sub">На баланс — потратится на любой заказ 🌸</div>' +
+        (d.message ? '<div class="gc-msg">«' + _escHtml(d.message) + '»</div>' : '') +
+        '<div class="gc-code-label">Код подарка</div>' +
+        '<div class="gc-code">' + _escHtml(d.code || '') + '</div>' +
+        '<div class="gc-foot"><div class="gc-from">' + from + '</div><div class="gc-fox">🦊</div></div>' +
+        '</div>' +
+        '<button class="auth-btn-primary" onclick="giftCopyCode(\'' + _escHtml(d.code || '') + '\')" style="margin-top:14px;">📋 Скопировать код</button>' +
+        '<p style="color:#a097b0;font-size:12px;text-align:center;margin-top:10px;">Перешлите код второй половинке — она введёт его в «Активировать код» 💜</p>';
+}
+async function checkPendingGift(tries) {
+    const gid = localStorage.getItem('pending_gift');
+    if (!gid || !getSessionToken()) return;
+    tries = tries || 0;
+    try {
+        const r = await fetch('/api/gift/' + gid);
+        const d = await r.json();
+        if (d.code && (d.status === 'active' || d.status === 'redeemed')) {
+            localStorage.removeItem('pending_gift');
+            showModal('gift-modal');
+            renderGiftCard(d);
+            return;
+        }
+    } catch (e) {}
+    // Оплата могла ещё не подтвердиться вебхуком — подождём и повторим
+    if (tries < 8) setTimeout(() => checkPendingGift(tries + 1), 2500);
+    else localStorage.removeItem('pending_gift');
+}
+document.addEventListener('DOMContentLoaded', function () { try { checkPendingGift(0); } catch (e) {} });
+
 // --- ИСТОРИЯ ЗАКАЗОВ ---
 // --- Повтор заказа («Заказать снова») ---
 const REORDER_PAGES = {

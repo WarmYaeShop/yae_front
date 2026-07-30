@@ -189,6 +189,37 @@ function renderHeader(isGamePage = false) {
         </div>
     </div>
 
+    <div class="modal-overlay" id="gift-modal" onclick="closeModal('gift-modal', event)">
+        <div class="custom-modal" onclick="event.stopPropagation()" style="max-width: 460px; width: 94%;">
+            <button class="close-modal-btn" onclick="closeModal('gift-modal')">×</button>
+            <h2 style="margin-bottom: 4px;">🎁 Подарочная карта</h2>
+            <p style="color:#a097b0; font-size:13px; margin-bottom:16px;">Подарите баланс близкому — он потратит его на любой заказ 🌸</p>
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="gift-tab-buy" onclick="switchGiftTab('buy')">🎁 Подарить</button>
+                <button class="auth-tab" id="gift-tab-redeem" onclick="switchGiftTab('redeem')">🎟 Активировать код</button>
+            </div>
+            <div id="gift-pane-buy" class="gift-pane">
+                <div class="gift-amounts" id="gift-amounts">
+                    <button class="gift-amt" onclick="giftPickAmount(this,300)">300 ₽</button>
+                    <button class="gift-amt" onclick="giftPickAmount(this,500)">500 ₽</button>
+                    <button class="gift-amt active" onclick="giftPickAmount(this,1000)">1000 ₽</button>
+                    <button class="gift-amt" onclick="giftPickAmount(this,2000)">2000 ₽</button>
+                </div>
+                <input id="gift-amount-custom" type="number" min="100" max="50000" placeholder="Или своя сумма, ₽" class="auth-input" oninput="giftCustomAmount()" style="margin-bottom:10px;">
+                <input id="gift-from" type="text" maxlength="64" placeholder="От кого (ваше имя)" class="auth-input" style="margin-bottom:10px;">
+                <input id="gift-message" type="text" maxlength="200" placeholder="Короткое пожелание (необязательно)" class="auth-input" style="margin-bottom:14px;">
+                <button onclick="giftCheckout(this)" class="auth-btn-primary" id="gift-buy-btn">Оплатить подарок →</button>
+                <div id="gift-buy-msg" class="auth-msg"></div>
+            </div>
+            <div id="gift-pane-redeem" class="gift-pane" style="display:none;">
+                <input id="gift-code-input" type="text" placeholder="YAE-XXXX-XXXX" class="auth-input" style="margin-bottom:12px; text-align:center; letter-spacing:2px; text-transform:uppercase;">
+                <button onclick="giftRedeem(this)" class="auth-btn-primary" id="gift-redeem-btn">Активировать →</button>
+                <div id="gift-redeem-msg" class="auth-msg"></div>
+            </div>
+            <div id="gift-card-view" style="display:none;"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="auth-modal" onclick="closeModal('auth-modal', event)">
         <div class="custom-modal auth-card" onclick="event.stopPropagation()" style="max-width: 400px; width: 92%;">
             <button class="close-modal-btn" onclick="closeModal('auth-modal')">×</button>
@@ -339,6 +370,11 @@ function renderHeader(isGamePage = false) {
             <a class="menu-item" onclick="goToShop(); toggleMobileMenu();">
                 <span class="menu-item-ic">🛒</span>
                 <span class="menu-item-txt"><b>Магазин</b><small>Перейти к товарам</small></span>
+                <span class="menu-item-arrow">›</span>
+            </a>
+            <a class="menu-item" onclick="openGiftModal(); toggleMobileMenu();">
+                <span class="menu-item-ic">🎁</span>
+                <span class="menu-item-txt"><b>Подарить</b><small>Подарочная карта</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
             <a class="menu-item" onclick="openReviewsModal(); toggleMobileMenu();">

@@ -227,14 +227,14 @@ async function renderTgReviews(container) {
             try {
                 if (r.date) date = new Date(r.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
             } catch (e) {}
-            return `<div class="rv-item">
+            return `<a class="rv-item" href="https://t.me/donatsgenshin/1363" target="_blank" rel="noopener" title="Открыть комментарии в Telegram">
                 <div class="rv-ava">${_escHtml(name.charAt(0).toUpperCase())}</div>
                 <div class="rv-body">
                     <div class="rv-name">${_escHtml(name)}</div>
                     <div class="rv-text">${_escHtml(r.text)}</div>
                     ${date ? `<div class="rv-date">${_escHtml(date)}</div>` : ''}
                 </div>
-            </div>`;
+            </a>`;
         }).join('');
     } catch (e) {
         _tgWidgetFallback(container);

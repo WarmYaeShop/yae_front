@@ -129,7 +129,7 @@ function renderHeader(isGamePage = false) {
 
             <div style="background: rgba(20, 15, 25, 0.6); border-left: 3px solid #ff7eb3; padding: 12px 15px; border-radius: 0 12px 12px 0; margin-bottom: 20px;">
                 <p style="margin: 0; font-size: 13px; color: #d8c3e0; line-height: 1.5;">
-                    Вы можете нажать на аватарку любого пользователя и написать ему лично, чтобы убедиться в честности нашего магазина. 
+                    Нажмите на любой отзыв — откроются комментарии в Telegram, где можно написать автору лично и убедиться в честности нашего магазина.
                     <br><span style="color: #ff7eb3; font-weight: bold; font-size: 12px; display: inline-block; margin-top: 5px;">Пожалуйста, уважайте чужое личное пространство и не беспокойте людей в позднее время! 🌙</span>
                 </p>
             </div>

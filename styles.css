@@ -131,7 +131,10 @@ input:-webkit-autofill:active {
 .rv-item {
     display: flex; gap: 12px; padding: 13px 14px; text-align: left;
     border-bottom: 1px solid rgba(74, 59, 93, 0.45);
+    text-decoration: none; color: inherit; cursor: pointer;
+    border-radius: 8px; transition: background 0.2s;
 }
+.rv-item:hover { background: rgba(255, 126, 179, 0.08); }
 .rv-item:last-child { border-bottom: none; }
 .rv-ava {
     width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%;

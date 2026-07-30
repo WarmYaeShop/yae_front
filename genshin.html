@@ -403,7 +403,7 @@
                 const btn = document.querySelector(`.buy-btn[data-name="${encodedName}"]`);
                 const minusBtn = document.querySelector(`.minus-btn[data-name="${encodedName}"]`);
                 
-                if (btn) { btn.innerText = `Добавить ещё (${qty} шт.)`; btn.classList.add('active-btn'); }
+                if (btn) { btn.innerText = `🛒 ${qty} шт.`; btn.classList.add('active-btn'); }
                 if (minusBtn) { minusBtn.style.display = 'flex'; }
 
                 const safeName = encodeURIComponent(name).replace(/'/g, '%27'); // надёжно для любых символов (кавычки, апострофы)

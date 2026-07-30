@@ -133,13 +133,18 @@ main {
 /* --- Кнопки карточки --- */
 .card-controls { display: flex; gap: 8px; width: 100%; }
 .minus-btn {
-    width: 44px; background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3;
+    width: 44px; height: 44px; box-sizing: border-box;
+    background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3;
     border-radius: 12px; font-weight: bold; font-size: 24px; cursor: pointer;
     transition: 0.3s; display: none; align-items: center; justify-content: center; padding: 0;
 }
 .minus-btn:hover { background: #ff7eb3; color: white; box-shadow: 0 0 15px rgba(255, 126, 179, 0.4); }
 .buy-btn {
-    flex: 1; padding: 10px; background: transparent;
+    /* Фикс. высота + один ряд текста — карточка не прыгает по высоте при добавлении */
+    flex: 1; height: 44px; box-sizing: border-box; padding: 0 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background: transparent;
     border: 1px solid #ff7eb3; color: #ff7eb3;
     border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s;
 }

@@ -66,6 +66,17 @@ function closeModal(id, e) {
 }
 function toggleFaq(el) { el.classList.toggle('active'); }
 
+// Плашка «Магазин» в меню: быстрый переход к товарам (каталог игры или сетка игр).
+// Если на странице нет ни каталога, ни сетки — уходим на главную к выбору игр.
+function goToShop() {
+    const el = document.getElementById('products-grid') || document.querySelector('.game-grid');
+    if (!el) { goToPage('/'); return; }
+    const head = document.querySelector('header');
+    const offset = (head ? head.offsetHeight : 0) + 12;
+    const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+}
+
 // --- ИСТОРИЯ ЗАКАЗОВ ---
 // --- Повтор заказа («Заказать снова») ---
 const REORDER_PAGES = {

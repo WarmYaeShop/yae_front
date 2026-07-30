@@ -336,6 +336,11 @@ function renderHeader(isGamePage = false) {
                 <span class="menu-item-txt"><b>Акции</b><small>Скидки и новости</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
+            <a class="menu-item" onclick="goToShop(); toggleMobileMenu();">
+                <span class="menu-item-ic">🛒</span>
+                <span class="menu-item-txt"><b>Магазин</b><small>Перейти к товарам</small></span>
+                <span class="menu-item-arrow">›</span>
+            </a>
             <a class="menu-item" onclick="openReviewsModal(); toggleMobileMenu();">
                 <span class="menu-item-ic">💗</span>
                 <span class="menu-item-txt"><b>Отзывы</b><small>Реальные комментарии</small></span>

@@ -61,8 +61,10 @@
         .faq-icon { transition: transform 0.4s ease; color: #ff7eb3; }
         .faq-item.active .faq-icon { transform: rotate(180deg); }
 
-        .faq-answer-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.4s ease-out; }
-        .faq-item.active .faq-answer-wrapper { grid-template-rows: 1fr; }
+        /* Раскрытие через max-height: grid-template-rows 0fr→1fr мигал экраном на
+           части ноутбучных GPU/браузеров (известный баг перерисовки Chromium) */
+        .faq-answer-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+        .faq-item.active .faq-answer-wrapper { max-height: 600px; }
         .faq-answer { overflow: hidden; }
         .faq-answer-inner { padding: 0 20px 20px; color: #a097b0; line-height: 1.6; font-size: 15px; }
 

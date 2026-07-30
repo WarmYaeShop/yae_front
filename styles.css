@@ -450,15 +450,16 @@ header {
     transition: 0.3s; z-index: 25; margin-right: 10px;
 }
 .header-btn {
-    background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3;
-    padding: 6px 14px; border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255,126,179,0.18), rgba(179,110,255,0.16));
+    border: none; color: #ffe1f0;
+    padding: 8px 16px; border-radius: 20px;
     font-weight: bold; font-size: 13px; cursor: pointer;
-    transition: 0.3s; display: flex; align-items: center; gap: 6px; white-space: nowrap;
+    transition: 0.25s; display: flex; align-items: center; gap: 6px; white-space: nowrap;
 }
 .header-btn:hover {
-    background: rgba(255, 126, 179, 0.2);
-    box-shadow: 0 0 15px rgba(255, 126, 179, 0.4);
-    transform: translateY(-2px); color: #fff; border-color: #fff;
+    background: linear-gradient(135deg, #ff7eb3, #b36eff);
+    box-shadow: 0 6px 18px rgba(255, 126, 179, 0.4);
+    transform: translateY(-2px); color: #fff;
 }
 .header-right { display: flex; align-items: center; gap: 20px; }
 

@@ -411,25 +411,48 @@
         }
 
         let checkoutBusy = false; // защита от двойного клика по «Перейти к оплате»
+        // Возврат с платёжки (кнопка «назад»): страница восстанавливается из bfcache
+        // с checkoutBusy=true и кнопкой «в загрузке» — сбрасываем, иначе кнопка виснет.
+        window.addEventListener('pageshow', function (e) {
+            if (!e.persisted) return;
+            checkoutBusy = false;
+            const b = document.querySelector('#step-details .checkout-btn');
+            if (b) { b.disabled = false; b.classList.remove('btn-loading'); b.innerText = 'Перейти к оплате'; }
+        });
         async function checkout() {
             if (checkoutBusy) return;
             if (Object.keys(cart).length === 0) { alert("Ваша корзина пуста! Добавьте хотя бы один товар."); return; }
             if (!document.getElementById('consent-input') || !document.getElementById('consent-input').checked) { alert("Пожалуйста, подтвердите согласие на обработку персональных данных."); return; }
-            const contactInput = document.getElementById('contact-input').value;
+            const contactInput = (document.getElementById('contact-input').value || '').trim();
             if (!contactInput) { alert("Пожалуйста, укажите ваш Telegram или VK для связи!"); document.getElementById('contact-input').focus(); return; }
 
             let userUid = null;
             let userServer = null;
             let codeTime = "";
             let isUrgent = false;
+            let loginEmail = "";
+            let loginPassword = "";
 
-            if (currentMethod === 'uid') {
-                userUid = document.getElementById('uid-input').value;
-                userServer = document.querySelector('#form-uid select').value;
-                if (!userUid) { alert("Пожалуйста, укажите ваш UID!"); return; }
-            } else if (currentMethod === 'login') {
+            // Способ определяем по реально показанной форме (надёжнее, чем один
+            // currentMethod — он мог не совпасть с тем, что видит пользователь).
+            const _uidActive = document.getElementById('form-uid')?.classList.contains('active');
+            const _loginActive = document.getElementById('form-login')?.classList.contains('active');
+            const method = _uidActive ? 'uid' : (_loginActive ? 'login' : currentMethod);
+            currentMethod = method;
+
+            if (method === 'uid') {
+                userUid = (document.getElementById('uid-input')?.value || '').trim();
+                userServer = document.querySelector('#form-uid select')?.value || '';
+                if (!userUid) { alert("Пожалуйста, укажите ваш UID!"); document.getElementById('uid-input')?.focus(); return; }
+                if (!userServer) { alert("Пожалуйста, выберите сервер!"); return; }
+            } else if (method === 'login') {
+                loginEmail = (document.getElementById('login-input')?.value || '').trim();
+                loginPassword = (document.getElementById('password-input')?.value || '').trim();
+                if (!loginEmail || !loginPassword) { alert("Пожалуйста, укажите логин и пароль!"); return; }
                 codeTime = document.getElementById('code-time-input') ? document.getElementById('code-time-input').value : "";
                 isUrgent = document.getElementById('urgent-checkbox') ? document.getElementById('urgent-checkbox').checked : false;
+            } else {
+                alert("Пожалуйста, выберите способ пополнения (по входу или по UID)."); return;
             }
 
             const tgUser = JSON.parse(localStorage.getItem('tg_user') || '{}');
@@ -457,6 +480,8 @@
                 game_name: gameName,
                 code_time: codeTime,
                 is_urgent: isUrgent,
+                login: loginEmail,
+                password: loginPassword,
                 promo_code: localStorage.getItem('promo_code_applied') || ''
             };
 

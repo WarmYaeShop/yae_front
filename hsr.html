@@ -322,16 +322,24 @@
 
         function flyToCart(button) {
             // Корзина за экраном (телефон) — лепесток летит к плавающей кнопке корзины
-            let header = document.getElementById('cart-header');
-            const hr = header ? header.getBoundingClientRect() : null;
-            const offscreen = !hr || hr.bottom < 0 || hr.top > window.innerHeight;
+            const header = document.getElementById('cart-header');
             const fab = document.getElementById('cart-float-btn');
-            if (offscreen && fab) header = fab;
-            const b = button.getBoundingClientRect(); const h = header.getBoundingClientRect();
+            const vis = r => r && r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < window.innerHeight;
+            const hr = header ? header.getBoundingClientRect() : null;
+            const fr = fab ? fab.getBoundingClientRect() : null;
+            let destX, destY, bounceEl = null;
+            if (vis(hr)) { destX = hr.left + hr.width / 2; destY = hr.top + hr.height / 2; bounceEl = header; }
+            else if (vis(fr)) { destX = fr.left + fr.width / 2; destY = fr.top + fr.height / 2; bounceEl = fab; }
+            else { // плавающая кнопка ещё скрыта (первый товар на мобиле) — целимся в её угол
+                const m = window.innerWidth <= 950 ? 16 : 24, s = window.innerWidth <= 950 ? 62 : 70;
+                destX = window.innerWidth - m - s / 2; destY = window.innerHeight - m - s / 2;
+            }
+            const b = button.getBoundingClientRect();
+            const sx = b.left + b.width / 2, sy = b.top + b.height / 2;
             const p = document.createElement('div'); p.classList.add('flying-cart-petal'); document.body.appendChild(p);
-            p.style.left = (b.left + b.width/2) + 'px'; p.style.top = (b.top + b.height/2) + 'px';
-            requestAnimationFrame(() => { p.style.transform = `translate(${h.left - b.left}px, ${h.top - b.top}px) scale(0.3) rotate(720deg)`; p.style.opacity = '0.5'; });
-            setTimeout(() => { p.remove(); header.classList.add('catch-bounce'); setTimeout(() => header.classList.remove('catch-bounce'), 300); }, 500);
+            p.style.left = sx + 'px'; p.style.top = sy + 'px';
+            requestAnimationFrame(() => { p.style.transform = `translate(${destX - sx}px, ${destY - sy}px) scale(0.3) rotate(720deg)`; p.style.opacity = '0.5'; });
+            setTimeout(() => { p.remove(); if (bounceEl) { bounceEl.classList.add('catch-bounce'); setTimeout(() => bounceEl.classList.remove('catch-bounce'), 300); } }, 500);
         }
 
         function addToCart(event, productName) {

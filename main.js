@@ -202,7 +202,7 @@ async function refreshOrdersList() {
 
 // --- ЛОГИКА ОТЗЫВОВ ---
 // Отзывы приходят с НАШЕГО сервера (/api/reviews — кэш комментариев из ТГ):
-// Telegram в РФ замедлен, и виджет у посетителей без VPN не грузится.
+// виджет Telegram у части посетителей не грузится, поэтому рендерим сами.
 // Если сервер ничего не отдал — фолбэк на виджет Telegram.
 function _tgWidgetFallback(container) {
     container.innerHTML = '';

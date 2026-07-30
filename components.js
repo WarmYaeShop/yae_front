@@ -219,7 +219,7 @@ function renderHeader(isGamePage = false) {
                 </div>
 
                 <div id="auth-pane-tg" class="auth-pane" style="display:none;">
-                    <p style="color: #d8c3e0; font-size: 13px; text-align: center; margin: 4px 0 16px;">Вход через нашего бота — работает всегда, даже без VPN</p>
+                    <p style="color: #d8c3e0; font-size: 13px; text-align: center; margin: 4px 0 16px;">Вход через нашего бота — быстро и надёжно</p>
                     <button onclick="startTgLogin(this)" class="auth-btn-primary" id="tg-login-btn">✈️ Войти через Telegram</button>
                     <div id="tg-login-status" class="auth-msg" style="text-align:center;"></div>
                     <p class="auth-hint">Откроется наш бот — нажмите в нём «Старт», и вход выполнится автоматически 🌸</p>

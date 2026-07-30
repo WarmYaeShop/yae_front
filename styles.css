@@ -127,7 +127,7 @@ input:-webkit-autofill:active {
 #tg-reviews-home:not(.collapsed)::-webkit-scrollbar { width: 4px; }
 #tg-reviews-home:not(.collapsed)::-webkit-scrollbar-thumb { background: #ff7eb3; border-radius: 4px; }
 #tg-reviews-home iframe { width: 100% !important; }
-/* Карточки отзывов (рендерим сами из /api/reviews — работает без VPN) */
+/* Карточки отзывов (рендерим сами из /api/reviews) */
 .rv-item {
     display: flex; gap: 12px; padding: 13px 14px; text-align: left;
     border-bottom: 1px solid rgba(74, 59, 93, 0.45);

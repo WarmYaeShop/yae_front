@@ -83,7 +83,7 @@
         .hero-content p { color: #d8c3e0; font-size: 16px; margin: 0 0 26px; line-height: 1.5; max-width: 400px; }
         .hero-btn { background: linear-gradient(90deg, #ff4dff, #b300b3); color: #fff; border: none; padding: 12px 28px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,77,255,0.3); }
         .hero-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(255,77,255,0.5); }
-        .hero-arrow { position: absolute; bottom: 13px; z-index: 4; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,126,179,0.4); color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .hero-arrow { position: absolute; bottom: 13px; z-index: 4; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,126,179,0.4); color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 22px; line-height: 1; font-weight: bold; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
         .hero-arrow:hover { background: #ff7eb3; box-shadow: 0 0 15px rgba(255,126,179,0.5); }
         .hero-arrow.left { right: 58px; }
         .hero-arrow.right { right: 14px; }
@@ -150,8 +150,8 @@
                     </div>
                 </div>
             </div>
-            <button class="hero-arrow left" onclick="heroMove(-1)">‹</button>
-            <button class="hero-arrow right" onclick="heroMove(1)">›</button>
+            <button class="hero-arrow left" onclick="heroMove(-1)">❮</button>
+            <button class="hero-arrow right" onclick="heroMove(1)">❯</button>
             <div class="hero-dots" id="heroDots"></div>
             <div class="hero-progress"><div class="hero-progress-bar" id="heroProgress"></div></div>
         </div>

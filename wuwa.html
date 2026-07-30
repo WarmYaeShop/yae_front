@@ -380,14 +380,14 @@
                 if (btn) { btn.innerText = `Добавить ещё (${qty} шт.)`; btn.classList.add('active-btn'); }
                 if (minusBtn) { minusBtn.style.display = 'flex'; }
 
-                const safeName = name.replace(/'/g, "\\'");
+                const safeName = encodeURIComponent(name).replace(/'/g, '%27'); // надёжно для любых символов (кавычки, апострофы)
                 container.innerHTML += `
                     <div class="cart-item">
                         <div class="cart-item-info"><div class="cart-item-name">${name}</div><div class="cart-item-price">${price} ₽ / шт</div></div>
                         <div class="cart-item-controls">
-                            <button class="qty-btn" onclick="removeFromCart('${safeName}')">-</button>
+                            <button class="qty-btn" onclick="removeFromCart(decodeURIComponent('${safeName}'))">-</button>
                             <span class="qty-text">${qty}</span>
-                            <button class="qty-btn" onclick="addToCart(null, '${safeName}')">+</button>
+                            <button class="qty-btn" onclick="addToCart(null, decodeURIComponent('${safeName}'))">+</button>
                         </div>
                     </div>`;
             });

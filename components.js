@@ -236,7 +236,7 @@ function renderHeader(isGamePage = false) {
                 <p id="auth-account-name" style="color: #ff7eb3; font-weight: bold; text-align: center; margin-bottom: 16px; word-break: break-all;">Имя</p>
 
                 <div class="tier-box">
-                    <div class="tier-badge"><span id="tier-icon">🌱</span> <span id="tier-name">Новичок</span> <span class="tier-disc" id="tier-disc"></span></div>
+                    <div class="tier-badge"><span id="tier-icon">🌱</span> <span id="tier-name">Новичок</span> <span class="tier-disc" id="tier-disc"></span><span onclick="toast('🏆 Ранг растёт от общей суммы ваших заказов и даёт автоматическую скидку на будущие покупки: 🥉 Бронза от 5 000 ₽ (−1%), 🥇 Золото от 10 000 ₽ (−2%), 💎 Алмаз от 50 000 ₽ (−3%).', 'info')" title="Как работают ранги?" style="cursor:pointer;margin-left:7px;background:rgba(255,126,179,0.25);color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;flex-shrink:0;">?</span></div>
                     <div class="tier-progress"><div class="tier-progress-fill" id="tier-progress-fill"></div></div>
                     <div class="tier-next" id="tier-next">Загрузка…</div>
                 </div>

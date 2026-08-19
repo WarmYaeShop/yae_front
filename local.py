@@ -21,7 +21,9 @@ app.mount("/assets", StaticFiles(directory=BASE_DIR), name="static")
 async def proxy(path: str, request: Request):
     url = f"{API_URL}/api/{path}"
 
-    async with httpx.AsyncClient(follow_redirects=True) as client:
+    # trust_env=False — не ходить через системный прокси Windows (с включённым
+    # VPN он перехватывал даже localhost и отдавал 503)
+    async with httpx.AsyncClient(follow_redirects=True, trust_env=False) as client:
         resp = await client.request(
             method=request.method,
             url=url,

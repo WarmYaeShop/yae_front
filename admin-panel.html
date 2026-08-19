@@ -42,6 +42,37 @@
         .chip { background:#15101d; border:1px solid #3a2b4d; border-radius:10px; padding:8px 14px; font-size:13px; color:#d8c3e0; }
         .chip b { color:#ff7eb3; }
 
+        /* ── Прибыль: периоды, три колонки, график по дням ── */
+        .per-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:18px; }
+        .per { background:#15101d; border:1px solid #3a2b4d; color:#d8c3e0; border-radius:10px; padding:7px 13px; font-size:13px; cursor:pointer; transition:0.2s; }
+        .per:hover { border-color:#ff7eb3; color:#fff; }
+        .per.on { background:linear-gradient(90deg,#ff4dff,#b300b3); border-color:transparent; color:#fff; font-weight:bold; }
+        .per-range { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-left:auto; }
+        .per-range input { background:#15101d; border:1px solid #3a2b4d; border-radius:9px; color:#d8c3e0; -webkit-text-fill-color:#d8c3e0; padding:6px 9px; font-size:12.5px; outline:none; color-scheme:dark; }
+        .per-range input:focus { border-color:#ff7eb3; }
+
+        .p-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; }
+        .p-col { background:#15101d; border:1px solid #3a2b4d; border-radius:14px; padding:16px 18px; }
+        .p-col.total { border-color:#4dff88; box-shadow:0 0 18px rgba(77,255,136,0.15); }
+        .p-col .who { color:#a097b0; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+        .p-col .big { font-size:26px; font-weight:bold; color:#ff7eb3; text-shadow:0 0 12px rgba(255,126,179,0.3); }
+        .p-col.total .big { color:#4dff88; text-shadow:0 0 14px rgba(77,255,136,0.35); }
+        .p-col .big.minus { color:#ff4d4d; text-shadow:0 0 12px rgba(255,77,77,0.35); }
+        .p-col .sub { color:#a097b0; font-size:12.5px; margin-top:9px; line-height:1.65; }
+        .p-col .sub b { color:#d8c3e0; font-weight:600; }
+
+        .p-note { color:#7c7090; font-size:12px; margin-top:14px; line-height:1.6; }
+        .p-note.warn { color:#ffcc00; }
+
+        .days { display:flex; align-items:flex-end; gap:3px; height:120px; margin-top:6px; }
+        .days .d { flex:1; min-width:3px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; cursor:default; }
+        .days .seg-bot { background:linear-gradient(180deg,#ff7eb3,#ff4dff); border-radius:3px 3px 0 0; }
+        .days .seg-site { background:linear-gradient(180deg,#4dff88,#2bbf63); }
+        .days .d:hover .seg-bot, .days .d:hover .seg-site { filter:brightness(1.25); }
+        .days-x { display:flex; justify-content:space-between; color:#7c7090; font-size:11px; margin-top:7px; }
+        .legend { display:flex; gap:14px; color:#a097b0; font-size:12px; margin-top:10px; }
+        .legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:middle; }
+
         table.orders { width:100%; border-collapse:collapse; font-size:13px; }
         table.orders th { text-align:left; color:#a097b0; font-weight:bold; padding:8px 10px; border-bottom:1px solid #3a2b4d; }
         table.orders td { padding:9px 10px; border-bottom:1px solid #221a2e; color:#d8c3e0; }
@@ -81,7 +112,45 @@
         <div class="cards" id="cards"></div>
 
         <div class="panel">
-            <h3>🎮 По играм (выручка)</h3>
+            <h3>💰 Прибыль за период <span id="p-label" style="color:#a097b0; font-size:13px; font-weight:normal;"></span></h3>
+
+            <div class="per-row" id="per-row">
+                <button class="per" data-preset="today">Сегодня</button>
+                <button class="per" data-preset="yesterday">Вчера</button>
+                <button class="per" data-preset="7d">7 дней</button>
+                <button class="per on" data-preset="30d">30 дней</button>
+                <button class="per" data-preset="month">Этот месяц</button>
+                <button class="per" data-preset="prev_month">Прошлый месяц</button>
+                <button class="per" data-preset="year">Этот год</button>
+                <button class="per" data-preset="all">Всё время</button>
+                <div class="per-range">
+                    <input type="date" id="p-from" title="Дата с">
+                    <input type="date" id="p-to" title="Дата по">
+                    <button class="per" onclick="applyRange()">Свой диапазон</button>
+                </div>
+            </div>
+
+            <div class="p-grid" id="p-grid"></div>
+            <div class="p-note" id="p-notes"></div>
+        </div>
+
+        <div class="panel">
+            <h3>📅 Прибыль по дням</h3>
+            <div class="days" id="p-days"></div>
+            <div class="days-x" id="p-days-x"></div>
+            <div class="legend">
+                <span><i style="background:linear-gradient(180deg,#ff7eb3,#ff4dff);"></i>Бот</span>
+                <span><i style="background:linear-gradient(180deg,#4dff88,#2bbf63);"></i>Сайт</span>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>🎮 Прибыль по играм (сайт + бот, за период)</h3>
+            <div id="p-games"></div>
+        </div>
+
+        <div class="panel">
+            <h3>🎮 По играм (выручка сайта, за всё время)</h3>
             <div id="by-game"></div>
         </div>
 
@@ -130,11 +199,11 @@
             document.getElementById('cost-warn').style.display = d.has_costs ? 'none' : 'block';
 
             document.getElementById('cards').innerHTML = `
-                <div class="card hl"><div class="v">${fmt(d.profit)} ₽</div><div class="l">💰 Прибыль (доход)</div></div>
-                <div class="card"><div class="v">${fmt(d.revenue)} ₽</div><div class="l">Оборот (выручка)</div></div>
-                <div class="card"><div class="v">${fmt(d.cost)} ₽</div><div class="l">Себестоимость</div></div>
+                <div class="card hl"><div class="v">${fmt(d.profit)} ₽</div><div class="l">💰 Прибыль сайта (всё время)</div></div>
+                <div class="card"><div class="v">${fmt(d.revenue)} ₽</div><div class="l">Оборот сайта (всё время)</div></div>
+                <div class="card"><div class="v">${fmt(d.cost)} ₽</div><div class="l">Себестоимость сайта</div></div>
                 <div class="card"><div class="v">${fmt(d.success_orders)}</div><div class="l">Успешных заказов</div></div>
-                <div class="card"><div class="v">${fmt(d.avg_check)} ₽</div><div class="l">Средний чек</div></div>
+                <div class="card"><div class="v">${fmt(d.avg_check)} ₽</div><div class="l">Средний чек сайта</div></div>
                 <div class="card"><div class="v">${fmt(d.total_orders)}</div><div class="l">Всего заказов</div></div>
                 <div class="card"><div class="v">${fmt(d.email_users)}</div><div class="l">Email-аккаунтов</div></div>`;
 
@@ -157,7 +226,110 @@
                     <td><b style="color:#ff7eb3;">${fmt(o.total_price)} ₽</b></td>
                     <td><span class="st ${statusClass(o.status)}">${o.status || '—'}</span></td>
                 </tr>`).join('') : '<tr><td colspan="6" style="color:#a097b0; text-align:center; padding:20px;">Заказов пока нет.</td></tr>';
+
+            loadProfit();
         }
+
+        // ── Прибыль за период ──────────────────────────────────────────
+        let pState = { preset: '30d', from: '', to: '' };
+
+        async function loadProfit() {
+            const key = getKey();
+            if (!key) { showGate(); return; }
+            const q = new URLSearchParams({ key: key, preset: pState.preset });
+            if (pState.from) q.set('date_from', pState.from);
+            if (pState.to) q.set('date_to', pState.to);
+            document.getElementById('p-label').innerText = '— считаю…';
+            try {
+                const res = await fetch('/api/admin/profit?' + q.toString());
+                if (res.status === 403) { localStorage.removeItem('admin_key'); showGate('Неверный ключ'); return; }
+                renderProfit(await res.json());
+            } catch (e) {
+                document.getElementById('p-label').innerText = '— ошибка соединения';
+            }
+        }
+
+        function pickPeriod(preset) {
+            pState = { preset: preset, from: '', to: '' };
+            document.getElementById('p-from').value = '';
+            document.getElementById('p-to').value = '';
+            document.querySelectorAll('#per-row .per[data-preset]').forEach(b =>
+                b.classList.toggle('on', b.dataset.preset === preset));
+            loadProfit();
+        }
+
+        function applyRange() {
+            const from = document.getElementById('p-from').value;
+            const to = document.getElementById('p-to').value;
+            if (!from && !to) { alert('Выбери хотя бы одну дату'); return; }
+            pState = { preset: 'custom', from: from, to: to };
+            document.querySelectorAll('#per-row .per[data-preset]').forEach(b => b.classList.remove('on'));
+            loadProfit();
+        }
+
+        function money(n) { return fmt(Math.round(Number(n) || 0)) + ' ₽'; }
+
+        function pCol(title, s, extra, cls) {
+            const minus = Number(s.profit) < 0 ? ' minus' : '';
+            return `<div class="p-col ${cls || ''}">
+                <div class="who">${title}</div>
+                <div class="big${minus}">${money(s.profit)}</div>
+                <div class="sub">
+                    Оборот: <b>${money(s.revenue)}</b><br>
+                    Себестоимость: <b>${money(s.cost)}</b><br>
+                    Заказов: <b>${fmt(s.orders)}</b> · средний чек <b>${money(s.avg_check)}</b><br>
+                    Маржа: <b>${s.margin}%</b>${extra || ''}
+                </div>
+            </div>`;
+        }
+
+        function renderProfit(d) {
+            document.getElementById('p-label').innerText = '— ' + d.period.label;
+
+            document.getElementById('p-grid').innerHTML =
+                pCol('🌐 Сайт', d.site, '') +
+                pCol('🤖 Бот', d.bot, '') +
+                pCol('Σ Итого', d.total, '', 'total');
+
+            // сноски: что может искажать цифры
+            const notes = [];
+            if (d.bot.error) notes.push('⚠️ Данные бота не прочитались из гугл-таблицы: ' + d.bot.error);
+            if (d.site.no_date_orders) notes.push('⚠️ Заказов сайта без даты: <b>' + d.site.no_date_orders +
+                '</b> — они попадают только в «Всё время» (оформлены до того, как мы начали писать дату).');
+            if (d.site.cost_estimated_orders) notes.push('ℹ️ У ' + d.site.cost_estimated_orders +
+                ' заказ(ов) сайта себестоимость посчитана по нынешним ценам — это прикидка, курс с тех пор мог измениться.');
+            notes.push('Комиссия платёжки 4% уже заложена в себестоимость. Отменённые и неоплаченные заказы не считаются.');
+            const box = document.getElementById('p-notes');
+            box.innerHTML = notes.join('<br>');
+            box.className = 'p-note' + ((d.bot.error || d.site.no_date_orders) ? ' warn' : '');
+
+            // график по дням: снизу бот, сверху сайт
+            const days = d.by_day || [];
+            const peak = Math.max(1, ...days.map(x => Math.max(0, x.bot_profit) + Math.max(0, x.site_profit)));
+            document.getElementById('p-days').innerHTML = days.length ? days.map(x => {
+                const bot = Math.max(0, x.bot_profit), site = Math.max(0, x.site_profit);
+                const tip = `${x.day}: ${money(x.profit)} (бот ${money(x.bot_profit)}, сайт ${money(x.site_profit)})`;
+                return `<div class="d" title="${tip}">
+                    <div class="seg-site" style="height:${site / peak * 100}%"></div>
+                    <div class="seg-bot" style="height:${bot / peak * 100}%"></div>
+                </div>`;
+            }).join('') : '<div style="color:#a097b0; font-size:13px;">За этот период данных нет.</div>';
+            document.getElementById('p-days-x').innerHTML = days.length
+                ? `<span>${days[0].day}</span><span>${days[days.length - 1].day}</span>` : '';
+
+            const games = d.by_game || [];
+            const top = Math.max(1, ...games.map(g => Math.abs(g.profit)));
+            document.getElementById('p-games').innerHTML = games.length ? games.map(g => `
+                <div class="bar-row">
+                    <div class="top"><span>${g.game} <span style="color:#7c7090;">(${g.orders})</span></span>
+                    <b style="${g.profit < 0 ? 'color:#ff4d4d;' : ''}">${money(g.profit)}
+                    <span style="color:#7c7090;font-weight:normal;">бот ${money(g.bot_profit)} / сайт ${money(g.site_profit)}</span></b></div>
+                    <div class="bar-track"><div class="bar-fill" style="width:${Math.round(Math.abs(g.profit) / top * 100)}%${g.profit < 0 ? ';background:linear-gradient(90deg,#ff4d4d,#a30000)' : ''}"></div></div>
+                </div>`).join('') : '<div style="color:#a097b0;">За этот период данных нет.</div>';
+        }
+
+        document.querySelectorAll('#per-row .per[data-preset]').forEach(b =>
+            b.addEventListener('click', () => pickPeriod(b.dataset.preset)));
 
         function showGate(msg) {
             document.getElementById('dash').style.display = 'none';

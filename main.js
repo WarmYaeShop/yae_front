@@ -33,9 +33,11 @@ setTimeout(hidePreloader, 4000); // подстраховка, если load до
 
 // --- МЕНЮ И МОДАЛКИ ---
 function toggleMobileMenu() { 
-    document.getElementById('side-menu').classList.toggle('active'); 
-    document.getElementById('menu-overlay').classList.toggle('active'); 
-    document.getElementById('hamburger-btn').classList.toggle('active'); 
+    const open = document.getElementById('side-menu').classList.toggle('active'); 
+    document.getElementById('menu-overlay').classList.toggle('active', open); 
+    document.getElementById('hamburger-btn').classList.toggle('active', open); 
+    // Пока меню открыто — сайт под ним не листается (на телефоне свайп крутил страницу)
+    if (open) _lockPageScroll(); else _unlockPageScroll();
 }
 // Пока открыта модалка — сайт под ней не листается (особенно важно на iPhone).
 // body фиксируется на текущей позиции, при закрытии позиция возвращается.
@@ -48,6 +50,7 @@ function _lockPageScroll() {
 }
 function _unlockPageScroll() {
     if (document.querySelector('.modal-overlay.active')) return; // открыта другая модалка
+    if (document.querySelector('.side-menu.active')) return;     // открыто боковое меню
     if (!document.body.classList.contains('modal-open')) return;
     document.body.classList.remove('modal-open');
     document.body.style.top = '';
@@ -69,6 +72,9 @@ function toggleFaq(el) { el.classList.toggle('active'); }
 // Плашка «Магазин» в меню: быстрый переход к товарам (каталог игры или сетка игр).
 // Если на странице нет ни каталога, ни сетки — уходим на главную к выбору игр.
 function goToShop() {
+    // Вызов из бокового меню: страница пока заблокирована — скроллим после того,
+    // как toggleMobileMenu() закроет меню и вернёт прокрутку
+    if (document.querySelector('.side-menu.active')) { setTimeout(goToShop, 0); return; }
     const el = document.getElementById('products-grid') || document.querySelector('.game-grid');
     if (!el) { goToPage('/'); return; }
     const head = document.querySelector('header');

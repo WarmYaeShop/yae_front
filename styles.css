@@ -512,6 +512,10 @@ header {
 .side-menu {
     position: fixed; top: 0; right: -380px;
     width: 330px; height: 100vh;
+    height: 100dvh; /* на телефоне учитывает адресную строку */
+    /* Своя прокрутка: на невысоких экранах пункты не влезают. contain — свайп
+       не «проваливается» на страницу под меню */
+    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
     /* blur убран: пересчитывался каждый кадр анимации выезда меню и ронял FPS */
     background: linear-gradient(160deg, rgba(32, 23, 45, 0.99), rgba(15, 11, 20, 0.99));
     border-left: 1px solid rgba(255, 126, 179, 0.4);
@@ -545,7 +549,7 @@ header {
 .side-menu-close:hover { background: #ff7eb3; color: #fff; transform: rotate(90deg); }
 
 /* Пункты меню */
-.side-menu-items { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.side-menu-items { display: flex; flex-direction: column; gap: 10px; flex: 1 0 auto; }
 .menu-item {
     display: flex; align-items: center; gap: 14px;
     padding: 12px 14px; border-radius: 14px;

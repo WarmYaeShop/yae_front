@@ -2,6 +2,118 @@
    ОБЩИЕ СТИЛИ — подключается на всех страницах
    ============================================= */
 
+/* --- Шрифты: лежат у нас (static/fonts), а не у Google ---
+   Google Fonts из России отвечает медленно и нестабильно. Только кириллица и
+   латиница; unicode-range — браузер качает лишь те файлы, чьи символы есть на
+   странице. У Roboto один «вариативный» файл сразу на 400 и 700. */
+/* Marck Script 400 — cyrillic */
+@font-face {
+  font-family: 'Marck Script';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(static/fonts/marckscript-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* Marck Script 400 — latin-ext */
+@font-face {
+  font-family: 'Marck Script';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(static/fonts/marckscript-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Marck Script 400 — latin */
+@font-face {
+  font-family: 'Marck Script';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(static/fonts/marckscript-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Roboto 400 — cyrillic-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/roboto-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* Roboto 400 — cyrillic */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/roboto-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* Roboto 400 — latin-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/roboto-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Roboto 400 — latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/roboto-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Roboto 700 — cyrillic-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/roboto-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* Roboto 700 — cyrillic */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/roboto-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* Roboto 700 — latin-ext */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/roboto-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* Roboto 700 — latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(static/fonts/roboto-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* Убираем синее выделение при клике на кнопки/карточки */
 button, a, .game-card, .product-card, .menu-item, .header-btn,
 .cart-item, .buy-btn, .minus-btn, .checkout-btn, .auth-btn-primary,
@@ -202,13 +314,21 @@ input:-webkit-autofill:active {
 }
 .cookie-banner.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 .cookie-banner span { color: #d8c3e0; font-size: 13px; line-height: 1.5; }
+.cookie-banner .ck-short { display: none; }
 .cookie-banner a { color: #ff7eb3; }
 .cookie-banner button {
     flex-shrink: 0; background: linear-gradient(90deg,#ff4dff,#b300b3); color: #fff;
     border: none; padding: 10px 22px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.25s;
 }
 .cookie-banner button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(179,0,179,0.4); }
-@media (max-width: 560px) { .cookie-banner { flex-direction: column; text-align: center; } }
+/* Телефон: узкая полоска у нижнего края вместо карточки на треть экрана */
+@media (max-width: 560px) {
+    .cookie-banner { bottom: 8px; width: calc(100% - 16px); padding: 9px 10px 9px 12px; gap: 10px; border-radius: 12px; }
+    .cookie-banner span { font-size: 11px; line-height: 1.35; }
+    .cookie-banner .ck-long { display: none; }
+    .cookie-banner .ck-short { display: inline; }
+    .cookie-banner button { padding: 8px 14px; font-size: 13px; border-radius: 9px; }
+}
 
 /* === ПРЕЛОАДЕР (заставка загрузки) === */
 #preloader {
@@ -888,7 +1008,7 @@ body.low-end-mode .how-card::after { display: none; }
 /* Цикл 40 с: ~11 с бежит слева направо, остальное время ждёт за краем экрана.
    Анимируется только transform — дёшево для видеокарты. */
 #yae-fox {
-    position: fixed; left: 0; bottom: 6px; z-index: 45; pointer-events: none; /* выше зерна/виньетки (40–41), ниже модалок */
+    position: fixed; left: 0; bottom: 6px; z-index: 45; cursor: pointer; /* выше зерна/виньетки (40–41), ниже модалок и кнопки корзины */
     width: 84px; height: 56px;
     transform: translateX(-120px);
     animation: foxRun 40s linear 6s infinite;
@@ -977,3 +1097,71 @@ body.low-end-mode #yae-fox { display: none; }
     #auth-modal .auth-pane, #auth-modal #auth-login-view, #auth-modal #auth-account-view, #auth-modal .auth-avatar { animation: none; }
 }
 body.low-end-mode #auth-modal .tier-progress-fill { transition: none; }
+
+/* Размеры иконок по месту */
+.ic.ic-t { width: 24px; height: 24px; margin-right: 9px; vertical-align: -4px; }      /* заголовки окон */
+.ic.ic-in { width: 16px; height: 16px; margin-right: 6px; vertical-align: -3px; }    /* в кнопках и подписях */
+.ic.ic-li { width: 15px; height: 15px; margin-right: 6px; vertical-align: -2px; }    /* пункты списков */
+.ic.ic-hero { width: 52px; height: 52px; stroke-width: 1.4; filter: drop-shadow(0 0 12px rgba(255, 126, 179, 0.35)); }
+.badge .ic { width: 18px; height: 18px; }
+.how-ic .ic { width: 44px; height: 44px; stroke-width: 1.5; }
+#cart-float-btn .cfb-icon .ic { width: 22px; height: 22px; display: block; }
+.cart-header .ic { margin: 0 auto 0 8px; width: 20px; height: 20px; }
+.fx-btn { display: inline-flex; align-items: center; }
+.tg-reviews-link { display: inline-flex; align-items: center; }
+/* На заливке цветом градиентная обводка теряется — там иконки белые */
+.auth-btn-primary .ic, .auth-tab.active .ic, .method-btn.active .ic, .contact-btn.active .ic { stroke: #fff; }
+#auth-modal .auth-btn-primary .ic, #auth-modal .auth-tab.active .ic { stroke: var(--peach-ink); }
+.method-btn .ic, .contact-btn .ic, .auth-tab .ic { transition: stroke 0.3s; }
+/* Подарочная карта светлая — там иконки в её малиновом цвете, сакура залитая */
+.ic.ic-gc { stroke: #c54f95; }
+.gc-sakura .ic.ic-fill { width: 1em; height: 1em; display: block; fill: #ffc4de; stroke: #ff8fc6; stroke-width: 1; }
+
+/* Кнопка «← Назад» в шапке страниц игр */
+.header-back {
+    color: #d8c3e0; text-decoration: none; font-weight: bold; font-size: 16px;
+    margin-right: 20px; transition: 0.3s; display: flex; align-items: center; gap: 4px;
+    z-index: 150; white-space: nowrap;
+}
+.header-back:hover { color: #fff; }
+/* Узкий телефон: логотип + «Назад» + профиль + меню не влезали в 390px —
+   оставляем только стрелку в кружке, логотип чуть меньше */
+@media (max-width: 420px) {
+    .header-right { gap: 12px; }
+    .logo-link { font-size: 20px; }
+    .header-back { margin-right: 0; width: 34px; height: 34px; justify-content: center; border-radius: 50%; background: rgba(255, 126, 179, 0.1); font-size: 18px; }
+    .header-back span { display: none; }
+}
+
+/* --- Пасхалка лисички: остановка, прыжок, лепестки, облачко с акцией --- */
+#yae-fox.fox-happy, #yae-fox.fox-happy .fox-leg { animation-play-state: paused; }
+#yae-fox.fox-happy .fox-bob { animation: foxJump 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) 2; }
+#yae-fox.fox-happy .fox-tail { animation-duration: 0.22s; }
+@keyframes foxJump { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(-20px); } }
+.fox-petal {
+    position: absolute; left: 50%; top: 35%; width: 9px; height: 9px; pointer-events: none;
+    border-radius: 100% 0 100% 0; background: linear-gradient(135deg, #ffe0ee, #ff9ec6);
+    animation: foxPetal 1.1s ease-out both;
+}
+@keyframes foxPetal {
+    from { transform: translate(0, 0) rotate(0) scale(0.5); opacity: 1; }
+    to   { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1); opacity: 0; }
+}
+.fox-bubble {
+    position: absolute; bottom: calc(100% + 10px); left: 50%;
+    transform: translateX(calc(-50% + var(--shift, 0px)));
+    width: max-content; max-width: 220px; padding: 10px 13px; cursor: default;
+    background: linear-gradient(145deg, #241c30, #181320); border: 1px solid rgba(255, 179, 179, 0.5);
+    border-radius: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    display: flex; flex-direction: column; gap: 4px; text-align: left;
+    animation: foxBubbleIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.fox-bubble b { color: #ffb3b3; font-size: 14px; }
+.fox-bubble span { color: #e8dff0; font-size: 12.5px; line-height: 1.4; }
+.fox-bubble button {
+    margin-top: 4px; align-self: flex-start; padding: 6px 11px; border: none; border-radius: 9px; cursor: pointer;
+    background: linear-gradient(90deg, #ffb3b3, #ff9ec6); color: #3a1f33; font-weight: bold; font-size: 12px;
+}
+.fox-bubble-out { animation: foxBubbleOut 0.3s ease forwards; }
+@keyframes foxBubbleIn { from { opacity: 0; margin-bottom: -6px; } to { opacity: 1; margin-bottom: 0; } }
+@keyframes foxBubbleOut { to { opacity: 0; margin-bottom: -6px; } }

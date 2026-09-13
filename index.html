@@ -39,11 +39,9 @@
         .modal-overlay, .menu-overlay, .profile-dropdown { opacity: 0; visibility: hidden; }
         #preloader { position: fixed; inset: 0; z-index: 100000; background: #0f0c14; }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Шрифты не блокируют отрисовку: media="print" → onload переключает на all -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap"></noscript>
+    <!-- Шрифты с нашего сервера; предзагружаем то, что видно сразу: логотип и русский текст -->
+    <link rel="preload" href="/static/fonts/marckscript-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/roboto-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles.css">
     <style>
         /* --- ГЛАВНАЯ СТРАНИЦА --- */
@@ -65,7 +63,7 @@
         .game-card:hover { transform: translateY(-10px); background: linear-gradient(rgba(30,25,38,0.6), rgba(30,25,38,0.6)) padding-box, linear-gradient(145deg, #ff7eb3, #b300b3) border-box; box-shadow: 0 8px 26px rgba(255, 126, 179, 0.4); }
         .game-card::after { content: ''; position: absolute; top: 0; left: 0; width: 55%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,0.09), transparent); transform: translateX(-170%) skewX(-14deg); pointer-events: none; z-index: 2; }
         @media (hover: hover) { .game-card:hover::after { transition: transform 0.8s ease; transform: translateX(280%) skewX(-14deg); } }
-        .game-icon-container { width: 100%; aspect-ratio: 1 / 1; border-radius: 15px; overflow: hidden; margin-bottom: 15px; border: 1px solid #4a3b5d; }
+        .game-icon-container { width: 100%; aspect-ratio: 1 / 1; border-radius: 15px; overflow: hidden; margin-bottom: 15px; border: 1px solid #4a3b5d; background: linear-gradient(145deg, #241b31, #15101d); /* подложка, пока картинка грузится */ }
         .game-icon-container img { width: 100%; height: 100%; object-fit: cover; }
         .game-name { font-weight: bold; font-size: 16px; color: #ffffff; }
 
@@ -94,7 +92,7 @@
         /* --- БАННЕР-КАРУСЕЛЬ --- */
         .hero-carousel { position: relative; max-width: 1000px; margin: 0 auto 45px; border-radius: 24px; overflow: hidden; box-shadow: 0 12px 45px rgba(0,0,0,0.45); border: 1px solid #3a2b4d; }
         .hero-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); }
-        .hero-slide { min-width: 100%; height: 320px; background-size: cover; background-position: right center; position: relative; display: flex; align-items: center; }
+        .hero-slide { min-width: 100%; height: 320px; background-color: #1a1424; /* подложка, пока баннер грузится */ background-size: cover; background-position: right center; position: relative; display: flex; align-items: center; }
         .hero-slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(13,10,20,0.95) 0%, rgba(13,10,20,0.75) 40%, rgba(13,10,20,0.15) 100%); }
         .hero-content { position: relative; z-index: 2; padding: 0 55px; max-width: 55%; }
         .hero-content h2 { font-size: 38px; margin: 0 0 14px; background: linear-gradient(90deg, #fff, #ff7eb3); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
@@ -176,9 +174,9 @@
 
         <h1 class="main-title" id="hero-title">Дешёвый донат в игры</h1>
         <div class="trust-badges" id="trust-badges">
-            <div class="badge">👑 5 лет на рынке</div>
-            <div class="badge">💗 1500+ отзывов</div>
-            <div class="badge">🚀 Быстрая доставка</div>
+            <div class="badge"><svg class="ic" aria-hidden="true"><use href="#ic-crown"></use></svg>5 лет на рынке</div>
+            <div class="badge"><svg class="ic" aria-hidden="true"><use href="#ic-heart"></use></svg>1500+ отзывов</div>
+            <div class="badge"><svg class="ic" aria-hidden="true"><use href="#ic-rocket"></use></svg>Быстрая доставка</div>
         </div>
 
         <div class="game-grid">
@@ -205,36 +203,36 @@
         </div>
 
         <div class="home-reviews">
-            <div class="section-title">Отзывы наших клиентов 💗</div>
+            <div class="section-title">Отзывы наших клиентов</div>
             <p class="home-reviews-sub">Реальные комментарии из нашего Telegram-канала</p>
             <div class="tg-reviews-card">
                 <div id="tg-reviews-home" class="collapsed"></div>
                 <div class="tg-reviews-fade" id="tg-reviews-fade"></div>
                 <div class="tg-reviews-actions">
                     <button class="tg-reviews-toggle" id="tg-reviews-toggle" onclick="toggleHomeReviews()">Развернуть отзывы ▾</button>
-                    <a class="tg-reviews-link" href="https://t.me/donatsgenshin/1363" target="_blank" rel="noopener">💬 Пост с отзывами</a>
+                    <a class="tg-reviews-link" href="https://t.me/donatsgenshin/1363" target="_blank" rel="noopener"><svg class="ic ic-in" aria-hidden="true"><use href="#ic-chat"></use></svg>Пост с отзывами</a>
                 </div>
             </div>
         </div>
 
         <div class="how-section">
-            <div class="section-title">Как это работает 🌸</div>
+            <div class="section-title">Как это работает</div>
             <div class="how-grid">
                 <div class="how-card">
                     <div class="how-num">1</div>
-                    <div class="how-ic">🎮</div>
+                    <div class="how-ic"><svg class="ic" aria-hidden="true"><use href="#ic-gamepad"></use></svg></div>
                     <h3>Выберите игру и товар</h3>
                     <p>Откройте нужную игру, выберите метод пополнения (по UID или по входу) и добавьте товары в корзину.</p>
                 </div>
                 <div class="how-card">
                     <div class="how-num">2</div>
-                    <div class="how-ic">💳</div>
+                    <div class="how-ic"><svg class="ic" aria-hidden="true"><use href="#ic-card"></use></svg></div>
                     <h3>Оплатите удобно</h3>
                     <p>Укажите UID или данные входа и оплатите безопасным способом. Скидки, бонусы и статус применятся автоматически.</p>
                 </div>
                 <div class="how-card">
                     <div class="how-num">3</div>
-                    <div class="how-ic">🚀</div>
+                    <div class="how-ic"><svg class="ic" aria-hidden="true"><use href="#ic-rocket"></use></svg></div>
                     <h3>Получите донат</h3>
                     <p>По UID — мгновенно, по входу — 15–30 минут. Всё как в самой игре: ×2 на первое пополнение и акции.</p>
                 </div>
@@ -242,7 +240,7 @@
         </div>
 
         <div class="faq-section">
-            <div class="section-title">Вопросы и ответы (FAQ) 🌸</div>
+            <div class="section-title">Вопросы и ответы (FAQ)</div>
             <div id="faq-list"></div>
         </div>
     </main>

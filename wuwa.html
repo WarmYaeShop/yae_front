@@ -15,11 +15,9 @@
         .modal-overlay, .menu-overlay, .profile-dropdown { opacity: 0; visibility: hidden; }
         #preloader { position: fixed; inset: 0; z-index: 100000; background: #0f0c14; }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Шрифты не блокируют отрисовку: media="print" → onload переключает на all -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap"></noscript>
+    <!-- Шрифты с нашего сервера; предзагружаем то, что видно сразу: логотип и русский текст -->
+    <link rel="preload" href="/static/fonts/marckscript-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/roboto-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="game-styles.css">
     <script src="components.js"></script>
@@ -120,8 +118,8 @@
             <div class="section-label">1. Метод пополнения</div>
             <div class="method-switch" id="method-switcher">
                 <div class="method-switch-slider"></div>
-                <button class="method-btn active" id="btn-login" onclick="switchMethod('login')">🔑 По Входу (Дешевле)</button>
-                <button class="method-btn" id="btn-uid" onclick="switchMethod('uid')">⚡ По UID (Мгновенно)</button>
+                <button class="method-btn active" id="btn-login" onclick="switchMethod('login')"><svg class="ic ic-in" aria-hidden="true"><use href="#ic-key"></use></svg>По Входу (Дешевле)</button>
+                <button class="method-btn" id="btn-uid" onclick="switchMethod('uid')"><svg class="ic ic-in" aria-hidden="true"><use href="#ic-bolt"></use></svg>По UID (Мгновенно)</button>
             </div>
 
             <div class="section-label">2. Выберите товары</div>
@@ -130,7 +128,7 @@
 
         <div class="cart-right" id="cart-box">
             <div id="step-cart" class="checkout-step active">
-                <div class="cart-header" id="cart-header">Ваш заказ 🎀</div>
+                <div class="cart-header" id="cart-header">Ваш заказ <svg class="ic ic-in" aria-hidden="true"><use href="#ic-bow"></use></svg></div>
                 <div class="cart-items" id="cart-items-container">
                     <div style="color: #a097b0; text-align: center; padding: 20px 0; font-style: italic;">Корзина пуста. Добавьте товары из каталога.</div>
                 </div>
@@ -147,8 +145,8 @@
                 <div class="input-group">
                     <div class="contact-switch" id="contact-switcher">
                         <div class="contact-switch-slider"></div>
-                        <button class="contact-btn active" id="btn-contact-tg" onclick="switchContact('tg')">✈️ Telegram</button>
-                        <button class="contact-btn" id="btn-contact-vk" onclick="switchContact('vk')">🌐 ВКонтакте</button>
+                        <button class="contact-btn active" id="btn-contact-tg" onclick="switchContact('tg')"><svg class="ic ic-in" aria-hidden="true"><use href="#ic-plane"></use></svg>Telegram</button>
+                        <button class="contact-btn" id="btn-contact-vk" onclick="switchContact('vk')"><svg class="ic ic-in" aria-hidden="true"><use href="#ic-globe"></use></svg>ВКонтакте</button>
                     </div>
                     <div class="input-field">
                         <input type="text" id="contact-input" placeholder="Ваш @username">
@@ -167,7 +165,7 @@
         <div class="input-field" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
             <label>Когда удобно передать код?</label>
             <input type="text" id="code-time-input" placeholder="Например: после 18:00 / по выходным" style="width: 100%; box-sizing: border-box;">
-            <div class="warning-text" style="margin-top:8px;">⚠️ Менеджер свяжется с вами для получения кода.</div>
+            <div class="warning-text" style="margin-top:8px;"><svg class="ic ic-in" aria-hidden="true"><use href="#ic-alert"></use></svg>Менеджер свяжется с вами для получения кода.</div>
         </div>
 
         <label class="urgent-label" style="display: flex; align-items: center; gap: 12px; cursor: pointer; background: rgba(30, 25, 38, 0.6); padding: 12px 15px; border-radius: 12px; border: 1px solid #3a2b4d; transition: border-color 0.2s;">
@@ -182,7 +180,7 @@
 
             <div>
                 <div style="color: #fff; font-weight: bold; font-size: 14px; display: flex; align-items: center;">
-                    🔥 Срочный заказ 
+                    <svg class="ic ic-in" aria-hidden="true"><use href="#ic-flame"></use></svg>Срочный заказ 
                     <span onclick="event.preventDefault(); event.stopPropagation(); toast('🔥 Срочный заказ: выдаём вне очереди, вперёд остальных. Пожалуйста, не злоупотребляйте — включайте, только если правда нужно быстро 🙏', 'info');" style="color: #fff; font-weight: bold; font-size: 13px; margin-left: 6px; cursor: pointer; background: rgba(255,126,179,0.3); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center;">?</span>
                 </div>
             </div>
@@ -211,7 +209,7 @@
                     <span class="total-amount" id="checkout-total-price" style="font-size: 20px;">0 ₽</span>
                 </div>
                 <div id="ref-checkout-box" class="ref-checkout-box" style="display:none;">
-                    <div id="ref-discount-note" style="display:none;">🎁 −3% по приглашению друга применится к заказу</div>
+                    <div id="ref-discount-note" style="display:none;"><svg class="ic ic-in" aria-hidden="true"><use href="#ic-gift"></use></svg>−3% по приглашению друга применится к заказу</div>
                     <div id="tier-discount-note" style="display:none;"></div>
                     <label id="ref-balance-row" style="display:none;">
                         <input type="checkbox" id="use-balance-check">
@@ -517,7 +515,7 @@
                     localStorage.removeItem('promo_code_applied'); // промокод потрачен 
                     if (data.payment_url) { window.location.href = data.payment_url; } else { showOrderSuccess(currentMethod); cart = {}; updateCartUI(); prevStep(); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false; }
                 } else { 
-                    alert("Ошибка платежной системы: " + data.message); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false; 
+                    toast(data.message || data.detail || "Не удалось оформить заказ. Попробуйте ещё раз.", "error"); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false; 
                 }
             } catch (err) { alert("Ошибка при соединении с сервером."); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false; }
         }

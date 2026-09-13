@@ -259,17 +259,30 @@ body.low-end-mode .prod-grid .product-card { animation: none; }
 .prod-search:focus { border-color: #ff7eb3; }
 .prod-search::placeholder { color: #7c7090; }
 
-/* --- Мобилка: 2 товара в строке, компактные карточки --- */
+/* --- Мобилка: 2 товара в строке ---
+   Карточки были мелковаты: поля страницы уже (12px вместо 20px), а иконка,
+   название, цена и кнопки крупнее — пальцем попадать удобнее.
+   Префикс body: у страниц игр свои <style> с теми же классами идут ПОСЛЕ этого
+   файла и иначе перебивали мобильные размеры. */
 @media (max-width: 600px) {
-    .products-grid, .prod-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .product-card { padding: 12px 10px; border-radius: 16px; }
-    .product-icon { font-size: 34px; margin-bottom: 6px; }
-    .product-icon img { max-width: 64px; max-height: 64px; }
-    .product-name { font-size: 12px; margin-bottom: 10px; }
-    .product-price { font-size: 16px; margin-bottom: 10px; }
-    .old-price { font-size: 12px; }
-    .buy-btn { padding: 8px 4px; font-size: 12px; }
-    .minus-btn { width: 36px; font-size: 20px; }
+    body main { padding-left: 12px; padding-right: 12px; }
+    body .products-grid, body .prod-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    body .product-card { padding: 16px 12px 14px; border-radius: 18px; }
+    body .product-icon { font-size: 42px; margin-bottom: 8px; }
+    body .product-icon img { max-width: 84px; max-height: 84px; }
+    body .product-name { font-size: 13.5px; margin-bottom: 12px; }
+    body .product-price { font-size: 18px; margin-bottom: 12px; }
+    body .old-price { font-size: 13px; }
+    body .buy-btn { height: 42px; padding: 0 6px; font-size: 13.5px; }
+    body .minus-btn { width: 42px; height: 42px; font-size: 22px; }
+    body .discount-badge { font-size: 11.5px; padding: 3px 8px; top: 8px; right: 8px; }
+}
+/* Совсем узкие экраны (iPhone SE и т.п.) — чуть сдержаннее, чтобы цены влезали */
+@media (max-width: 360px) {
+    body .product-icon img { max-width: 70px; max-height: 70px; }
+    body .product-name { font-size: 12.5px; }
+    body .product-price { font-size: 16.5px; }
+    body .buy-btn { font-size: 12.5px; }
 }
 .cat-tab-locked { opacity: 0.75; }
 .cat-count.cat-locked { background: rgba(255,77,77,0.18); color: #ffb3b3; font-size: 10px; }

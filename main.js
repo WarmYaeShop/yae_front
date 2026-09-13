@@ -26,10 +26,22 @@ window.addEventListener('pageshow', (e) => {
     if (e.persisted) hidePreloader();
 });
 
-// --- Прелоадер: прячем после полной загрузки страницы ---
+// --- Прелоадер ---
+// Раньше ждали событие load — это ВСЕ картинки и виджет Telegram, до 4 с на главной.
+// Теперь прячем, как только разметка готова и шрифты подгрузились (логотип не
+// «перепрыгивает» на другой шрифт), но не дольше 1.2 с. Картинки догружаются
+// уже при открытом сайте — у карточек и баннера для этого есть свои фоны.
 function hidePreloader() { const p = document.getElementById('preloader'); if (p) p.classList.add('hidden'); }
-window.addEventListener('load', () => setTimeout(hidePreloader, 300));
-setTimeout(hidePreloader, 4000); // подстраховка, если load долго не наступает
+(function () {
+    function whenReady() {
+        const fonts = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+        Promise.race([fonts, new Promise(r => setTimeout(r, 1200))]).then(() => setTimeout(hidePreloader, 120));
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', whenReady);
+    else whenReady();
+    window.addEventListener('load', hidePreloader);
+    setTimeout(hidePreloader, 2500); // подстраховка
+})();
 
 // --- МЕНЮ И МОДАЛКИ ---
 function toggleMobileMenu() { 
@@ -157,16 +169,16 @@ function renderGiftCard(d) {
     view.style.display = '';
     view.innerHTML =
         '<div class="gift-card">' +
-        '<span class="gc-sakura tr">🌸</span><span class="gc-sakura bl">🌸</span>' +
-        '<div class="gc-top"><div class="gc-brand">🎁 Подарочная карта</div><div class="gc-label">Yae&nbsp;Shop</div></div>' +
+        '<span class="gc-sakura tr">' + icon('sakura', 'ic-fill') + '</span><span class="gc-sakura bl">' + icon('sakura', 'ic-fill') + '</span>' +
+        '<div class="gc-top"><div class="gc-brand">' + icon('gift', 'ic-in ic-gc') + 'Подарочная карта</div><div class="gc-label">Yae&nbsp;Shop</div></div>' +
         '<div class="gc-amount">' + Number(d.amount).toLocaleString('ru-RU') + '<small> ₽</small></div>' +
-        '<div class="gc-sub">На баланс — потратится на любой заказ 🌸</div>' +
+        '<div class="gc-sub">На баланс — потратится на любой заказ</div>' +
         (d.message ? '<div class="gc-msg">«' + _escHtml(d.message) + '»</div>' : '') +
         '<div class="gc-code-label">Код подарка</div>' +
         '<div class="gc-code">' + _escHtml(d.code || '') + '</div>' +
         '<div class="gc-foot"><div class="gc-from">' + from + '</div><div class="gc-fox">🦊</div></div>' +
         '</div>' +
-        '<button class="auth-btn-primary" onclick="giftCopyCode(\'' + _escHtml(d.code || '') + '\')" style="margin-top:14px;">📋 Скопировать код</button>' +
+        '<button class="auth-btn-primary" onclick="giftCopyCode(\'' + _escHtml(d.code || '') + '\')" style="margin-top:14px;">' + icon('copy', 'ic-in') + 'Скопировать код</button>' +
         '<p style="color:#a097b0;font-size:12px;text-align:center;margin-top:10px;">Перешлите код второй половинке — она введёт его в «Активировать код» 💜</p>';
 }
 async function checkPendingGift(tries) {
@@ -229,7 +241,7 @@ async function repayOrder(id, btn) {
     } catch (e) {
         toast('Ошибка соединения. Попробуйте ещё раз', 'error');
     }
-    if (btn) { btn.disabled = false; btn.innerText = '💳 Оплатить'; }
+    if (btn) { btn.disabled = false; btn.innerHTML = icon('card', 'ic-in ic-white') + 'Оплатить'; }
 }
 
 // Вызывается на странице игры: возвращает данные повтора, если они для этой игры
@@ -310,8 +322,8 @@ async function refreshOrdersList() {
                             </div>
                         </div>
                         ${orderTrackerHTML(o.status)}
-                        ${canPay ? `<button onclick="repayOrder(${o.id}, this)" style="margin-top: 12px; width: 100%; background: linear-gradient(90deg, #ff4dff, #b300b3); border: none; color: #fff; padding: 10px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 77, 255, 0.25);">💳 Оплатить</button>` : ''}
-                        ${canReorder ? `<button onclick="reorderById(${o.id})" style="margin-top: 12px; width: 100%; background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3; padding: 9px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,126,179,0.12)'" onmouseout="this.style.background='transparent'">🔁 Заказать снова</button>` : ''}
+                        ${canPay ? `<button onclick="repayOrder(${o.id}, this)" style="margin-top: 12px; width: 100%; background: linear-gradient(90deg, #ff4dff, #b300b3); border: none; color: #fff; padding: 10px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 77, 255, 0.25);">${icon('card', 'ic-in ic-white')}Оплатить</button>` : ''}
+                        ${canReorder ? `<button onclick="reorderById(${o.id})" style="margin-top: 12px; width: 100%; background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3; padding: 9px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,126,179,0.12)'" onmouseout="this.style.background='transparent'">${icon('repeat', 'ic-in')}Заказать снова</button>` : ''}
                     </div>
                 `;
             });
@@ -594,7 +606,7 @@ function highlightFxButtons() {
     const hint = document.getElementById('fx-auto-hint');
     if (hint) {
         const auto = localStorage.getItem('fx_auto');
-        const names = { max: '✨ Максимум', mid: '⚖️ Средний', low: '🔋 Эконом' };
+        const names = { max: 'Максимум', mid: 'Средний', low: 'Эконом' };
         hint.innerText = (chosen === 'auto' && auto) ? ('Авто выбрал: ' + names[auto]) : '';
     }
 }
@@ -904,7 +916,7 @@ function onTelegramAuth(user) {
 let _tgLoginTimer = null;
 async function startTgLogin(btn) {
     const status = document.getElementById('tg-login-status');
-    const reset = () => { if (btn) { btn.disabled = false; btn.innerHTML = '✈️ Войти через Telegram'; } };
+    const reset = () => { if (btn) { btn.disabled = false; btn.innerHTML = icon('plane', 'ic-in') + 'Войти через Telegram'; } };
     // Окно открываем СИНХРОННО (до await) — иначе блокировщик всплывашек не пустит
     let win = null;
     try { win = window.open('', '_blank'); } catch (e) {}
@@ -1168,7 +1180,7 @@ function initFloatingCartBtn() {
     const btn = document.createElement('div');
     btn.id = 'cart-float-btn';
     btn.title = 'Перейти к корзине';
-    btn.innerHTML = '<span class="cfb-icon">🛒</span><span class="cfb-sum" id="cfb-sum-text">0 ₽</span>';
+    btn.innerHTML = '<span class="cfb-icon">' + icon('bag', 'ic-white') + '</span><span class="cfb-sum" id="cfb-sum-text">0 ₽</span>';
     btn.addEventListener('click', () => {
         const cart = document.querySelector('.cart-right');
         if (!cart) return;

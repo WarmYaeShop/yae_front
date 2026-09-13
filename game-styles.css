@@ -56,12 +56,12 @@ main {
 }
 .content-left { flex: 1; min-width: 0; }
 .cart-right {
-    width: 350px; position: sticky; top: 100px;
+    width: 350px; position: sticky; top: calc(var(--header-h, 72px) + 24px);
     background: rgba(30, 25, 38, 0.94); border: 1px solid #ff7eb3;
     border-radius: 20px; padding: 25px;
     box-shadow: 0 0 30px rgba(255, 126, 179, 0.15);
     /* blur убран: на sticky-элементе пересчитывался при каждом скролле (FPS) */
-    max-height: calc(100vh - 120px); overflow-y: auto; box-sizing: border-box;
+    max-height: calc(100vh - var(--header-h, 72px) - 44px); overflow-y: auto; box-sizing: border-box;
 }
 .cart-right::-webkit-scrollbar { width: 4px; }
 .cart-right::-webkit-scrollbar-thumb { background: #ff7eb3; border-radius: 5px; }

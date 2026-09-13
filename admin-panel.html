@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админка — Yae Shop</title>
+    <!-- Анти-мигание: пока styles.css не применился, служебные слои скрыты.
+         Без этого боковое меню и модалки на секунду видны «голым» списком. -->
+    <style>
+        html, body { background: #14101d; margin: 0; }
+        .side-menu { position: fixed; top: 0; right: -380px; }
+        .modal-overlay, .menu-overlay, .profile-dropdown { opacity: 0; visibility: hidden; }
+        #preloader { position: fixed; inset: 0; z-index: 100000; background: #0f0c14; }
+    </style>
     <link rel="stylesheet" href="styles.css">
     <style>
         body { padding: 0; }

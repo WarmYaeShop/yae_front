@@ -68,10 +68,104 @@
     else document.addEventListener('DOMContentLoaded', addGrain);
 })();
 
+// Высота фиксированной шапки → CSS-переменная --header-h.
+// Шапка вынута из потока, поэтому body отступает сверху ровно на её высоту.
+// Меряем, а не хардкодим: высота меняется от ширины экрана и от того, успел ли
+// подгрузиться Marck Script (логотип этим шрифтом выше запасного).
+(function () {
+    function measure() {
+        var h = document.querySelector('header');
+        if (!h) return;
+        var px = Math.round(h.getBoundingClientRect().height);
+        if (px > 0) document.documentElement.style.setProperty('--header-h', px + 'px');
+    }
+    function init() {
+        measure();
+        var h = document.querySelector('header');
+        if (h && window.ResizeObserver) {
+            try { new ResizeObserver(measure).observe(h); } catch (e) {}
+        }
+        window.addEventListener('resize', measure);
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(measure).catch(function () {});
+        }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+})();
+
+// === Бегающая лисичка (маскот) ===
+// Раз в ~40 с пробегает по низу экрана. Только transform — не грузит слабые ПК.
+// В «Экономе» и при системном «уменьшить движение» скрыта (см. #yae-fox в styles.css).
+(function () {
+    var SVG = '<svg viewBox="0 0 120 80" aria-hidden="true">' +
+        '<defs>' +
+        '<linearGradient id="fx-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff5fb"/><stop offset="1" stop-color="#ffcfe6"/></linearGradient>' +
+        '<linearGradient id="fx-tail" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffe3f1"/><stop offset=".55" stop-color="#ffa9d4"/><stop offset="1" stop-color="#b98cff"/></linearGradient>' +
+        '</defs>' +
+        // хвост
+        '<g class="fox-tail"><path d="M42 47C28 53 9 49 4 34 0 22 7 9 19 7c-3 9 0 19 8 26 5 4 10 8 15 14z" fill="url(#fx-tail)"/>' +
+        '<path d="M19 7C9 9 3 18 5 28c3-8 8-14 14-21z" fill="#fff" opacity=".85"/></g>' +
+        // дальние лапы (темнее)
+        '<g class="fox-leg leg-b2"><rect x="40" y="56" width="7" height="16" rx="3.5" fill="#f2b6d6"/></g>' +
+        '<g class="fox-leg leg-f2"><rect x="72" y="56" width="7" height="16" rx="3.5" fill="#f2b6d6"/></g>' +
+        // тело
+        '<ellipse cx="60" cy="52" rx="25" ry="14" fill="url(#fx-body)"/>' +
+        '<path d="M48 45c3 2 6 2 9 0M52 50c2 1.4 4 1.4 6 0" stroke="#ff9ecd" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+        // ближние лапы
+        '<g class="fox-leg leg-b1"><rect x="45" y="57" width="7.5" height="17" rx="3.7" fill="#fff0f7"/><rect x="45" y="70" width="7.5" height="4" rx="2" fill="#ff9ecd"/></g>' +
+        '<g class="fox-leg leg-f1"><rect x="76" y="57" width="7.5" height="17" rx="3.7" fill="#fff0f7"/><rect x="76" y="70" width="7.5" height="4" rx="2" fill="#ff9ecd"/></g>' +
+        // голова
+        '<g class="fox-head">' +
+        '<path d="M80 30L81 11 93 24z" fill="#fff0f7"/><path d="M83 26l.6-10 6.4 7z" fill="#ff9ecd"/>' +
+        '<path d="M95 23l10-11 1 17z" fill="#fff0f7"/><path d="M98 23l6-6.5.6 9.5z" fill="#ff9ecd"/>' +
+        '<ellipse cx="92" cy="38" rx="15" ry="13" fill="url(#fx-body)"/>' +
+        '<path d="M102 36c7 1 11 4 11 6-3 3-9 3-13 1z" fill="#fff5fb"/>' +
+        '<circle cx="112.5" cy="41.5" r="1.8" fill="#6b3a63"/>' +
+        '<path d="M92 36q3-3 6 0" stroke="#6b3a63" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="95" cy="43" rx="3.2" ry="2" fill="#ff8fc6" opacity=".55"/>' +
+        '<path d="M86 29l2 3 2-3" stroke="#ff7eb3" stroke-width="1.4" fill="none" stroke-linecap="round"/>' +
+        '</g></svg>';
+    function addFox() {
+        if (document.getElementById('yae-fox') || !document.querySelector('header')) return;
+        var wrap = document.createElement('div');
+        wrap.id = 'yae-fox';
+        wrap.innerHTML = '<div class="fox-bob">' + SVG + '</div>';
+        document.body.appendChild(wrap);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addFox);
+    else addFox();
+})();
+
+// === Иконки сайта (SVG-спрайт) ===
+// Вместо системных эмодзи: линейные иконки с розово-фиолетовым градиентом,
+// в одном стиле с иконкой профиля. Использование: icon('tag') → <svg><use/></svg>.
+const ICON_SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="ic-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffb3d6"/><stop offset="1" stop-color="#b98cff"/>
+    </linearGradient>
+  </defs>
+  <symbol id="ic-tag" viewBox="0 0 24 24"><path d="M20.6 12.4l-8.2 8.2a2 2 0 0 1-2.8 0l-6.2-6.2a2 2 0 0 1-.6-1.6l.5-6.2a2 2 0 0 1 1.8-1.8l6.2-.5a2 2 0 0 1 1.6.6l6.2 6.2a2 2 0 0 1 0 2.8z"/><circle cx="8.3" cy="8.3" r="1.5"/></symbol>
+  <symbol id="ic-bag" viewBox="0 0 24 24"><path d="M5.5 8h13l-1 11.2a2 2 0 0 1-2 1.8h-7a2 2 0 0 1-2-1.8z"/><path d="M9 10V6.5a3 3 0 0 1 6 0V10"/></symbol>
+  <symbol id="ic-gift" viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v7.5A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V12M12 8v13"/><path d="M12 8C11 5 9.8 3.8 8.3 3.8a2.1 2.1 0 0 0 0 4.2zM12 8c1-3 2.2-4.2 3.7-4.2a2.1 2.1 0 0 1 0 4.2z"/></symbol>
+  <symbol id="ic-heart" viewBox="0 0 24 24"><path d="M12 20.5l-7.3-7.1a4.6 4.6 0 0 1 6.5-6.5l.8.8.8-.8a4.6 4.6 0 0 1 6.5 6.5z"/></symbol>
+  <symbol id="ic-headset" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><path d="M4 14.5h2.6a1 1 0 0 1 1 1v3.8a1 1 0 0 1-1 1H5.8A1.8 1.8 0 0 1 4 18.5zM20 14.5h-2.6a1 1 0 0 0-1 1v3.8a1 1 0 0 0 1 1h.8a1.8 1.8 0 0 0 1.8-1.8z"/></symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24"><path d="M12 3l7 2.8v5.6c0 4.5-3 8.1-7 9.6-4-1.5-7-5.1-7-9.6V5.8z"/><path d="M9 12.2l2.1 2.1 4-4.2"/></symbol>
+  <symbol id="ic-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="#1c1526"/><circle cx="15.5" cy="12" r="2" fill="#1c1526"/><circle cx="8" cy="17" r="2" fill="#1c1526"/></symbol>
+  <symbol id="ic-plane" viewBox="0 0 24 24"><path d="M21 3.5L2.8 10.6l6.4 2.3zM21 3.5l-11.8 9.4.7 6.6 3.1-4.4zM21 3.5l-3.4 16-4.7-4.6"/></symbol>
+</svg>`;
+function icon(name, cls) {
+    return '<svg class="ic' + (cls ? ' ' + cls : '') + '" aria-hidden="true"><use href="#ic-' + name + '"></use></svg>';
+}
+
 function renderHeader(isGamePage = false) {
-    let backBtnHTML = isGamePage ? `<a href="#" onclick="goToPage('/'); return false;" style="color: #d8c3e0; text-decoration: none; font-weight: bold; font-size: 16px; margin-right: 20px; transition: 0.3s; display: flex; align-items: center; z-index: 150;">← Назад</a>` : '';
+    if (document.body) document.body.classList.add('has-header');
+    let backBtnHTML = isGamePage ? `<a href="#" onclick="goToPage('/'); return false;" style="color: #d8c3e0; text-decoration: none; font-weight: bold; font-size: 16px; margin-right: 20px; transition: 0.3s; display: flex; align-items: center; z-index: 150; white-space: nowrap;">← Назад</a>` : '';
 
     document.write(`
+    ${ICON_SPRITE}
     <div id="preloader">
         <div class="preloader-logo">Donate by Yae Miko</div>
         <div class="preloader-bar"></div>
@@ -337,10 +431,10 @@ function renderHeader(isGamePage = false) {
     <header>
         <div class="logo-container">
             <a href="#" onclick="goToPage('/'); return false;" class="logo-link">Donate by Yae Miko</a>
-            <button class="header-btn" onclick="openPromosModal()">🔥 Акции</button>
-            <button class="header-btn" onclick="showModal('safety-modal')">🔒 Безопасность</button>
-            <button class="header-btn" onclick="openReviewsModal()">💗 Отзывы</button>
-            <button class="header-btn" onclick="showModal('support-modal')">🎧 Поддержка</button>
+            <button class="header-btn" onclick="openPromosModal()">${icon('tag')}Акции</button>
+            <button class="header-btn" onclick="showModal('safety-modal')">${icon('shield')}Безопасность</button>
+            <button class="header-btn" onclick="openReviewsModal()">${icon('heart')}Отзывы</button>
+            <button class="header-btn" onclick="showModal('support-modal')">${icon('headset')}Поддержка</button>
         </div>
         <div class="header-right">
             ${backBtnHTML}
@@ -363,47 +457,47 @@ function renderHeader(isGamePage = false) {
         </div>
         <div class="side-menu-items">
             <a class="menu-item" onclick="openPromosModal(); toggleMobileMenu();">
-                <span class="menu-item-ic">🔥</span>
+                <span class="menu-item-ic">${icon('tag')}</span>
                 <span class="menu-item-txt"><b>Акции</b><small>Скидки и новости</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
             <a class="menu-item" onclick="goToShop(); toggleMobileMenu();">
-                <span class="menu-item-ic">🛒</span>
+                <span class="menu-item-ic">${icon('bag')}</span>
                 <span class="menu-item-txt"><b>Магазин</b><small>Перейти к товарам</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
             <a class="menu-item" onclick="openGiftModal(); toggleMobileMenu();">
-                <span class="menu-item-ic">🎁</span>
+                <span class="menu-item-ic">${icon('gift')}</span>
                 <span class="menu-item-txt"><b>Подарить</b><small>Подарочная карта</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
             <a class="menu-item" onclick="openReviewsModal(); toggleMobileMenu();">
-                <span class="menu-item-ic">💗</span>
+                <span class="menu-item-ic">${icon('heart')}</span>
                 <span class="menu-item-txt"><b>Отзывы</b><small>Реальные комментарии</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
             <a class="menu-item" onclick="showModal('support-modal'); toggleMobileMenu();">
-                <span class="menu-item-ic">🎧</span>
+                <span class="menu-item-ic">${icon('headset')}</span>
                 <span class="menu-item-txt"><b>Поддержка</b><small>Поможем с заказом</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
             <a class="menu-item" onclick="openScheduleModal(); toggleMobileMenu();">
-                <span class="menu-item-ic">🕓</span>
+                <span class="menu-item-ic">${icon('clock')}</span>
                 <span class="menu-item-txt"><b>Часы работы</b><small>Когда мы на связи</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
             <a class="menu-item" onclick="showModal('safety-modal'); toggleMobileMenu();">
-                <span class="menu-item-ic">🔒</span>
+                <span class="menu-item-ic">${icon('shield')}</span>
                 <span class="menu-item-txt"><b>Безопасность</b><small>Почему нам доверяют</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
             <a class="menu-item" onclick="openSettingsModal(); toggleMobileMenu();">
-                <span class="menu-item-ic">⚙️</span>
+                <span class="menu-item-ic">${icon('sliders')}</span>
                 <span class="menu-item-txt"><b>Настройки</b><small>Сакура, анимации</small></span>
                 <span class="menu-item-arrow">›</span>
             </a>
         </div>
-        <a class="side-menu-tg js-tg-channel" href="https://t.me/donatsgenshin" target="_blank" rel="noopener">✈️ Наш Telegram-канал</a>
+        <a class="side-menu-tg js-tg-channel" href="https://t.me/donatsgenshin" target="_blank" rel="noopener">${icon('plane', 'ic-white')}Наш Telegram-канал</a>
     </nav>
     `);
 }

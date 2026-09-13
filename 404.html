@@ -5,7 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Страница не найдена — Yae Shop</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Анти-мигание: пока styles.css не применился, служебные слои скрыты.
+         Без этого боковое меню и модалки на секунду видны «голым» списком. -->
+    <style>
+        html, body { background: #14101d; margin: 0; }
+        .side-menu { position: fixed; top: 0; right: -380px; }
+        .modal-overlay, .menu-overlay, .profile-dropdown { opacity: 0; visibility: hidden; }
+        #preloader { position: fixed; inset: 0; z-index: 100000; background: #0f0c14; }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Шрифты не блокируют отрисовку: media="print" → onload переключает на all -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap"></noscript>
     <link rel="stylesheet" href="styles.css">
     <style>
         .nf { min-height: 82vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 20px; position: relative; z-index: 5; }

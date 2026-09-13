@@ -7,15 +7,27 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="description" content="Донат в Zenless Zone Zero — монохромы, БП, подписки. Быстро по UID или по входу на Yae Shop.">
     <title>Zenless Zone Zero — Yae Shop</title>
-    <link href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script src="components.js"></script>
+    <!-- Анти-мигание: пока styles.css не применился, служебные слои скрыты.
+         Без этого боковое меню и модалки на секунду видны «голым» списком. -->
+    <style>
+        html, body { background: #14101d; margin: 0; }
+        .side-menu { position: fixed; top: 0; right: -380px; }
+        .modal-overlay, .menu-overlay, .profile-dropdown { opacity: 0; visibility: hidden; }
+        #preloader { position: fixed; inset: 0; z-index: 100000; background: #0f0c14; }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Шрифты не блокируют отрисовку: media="print" → onload переключает на all -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&family=Roboto:wght@400;700&display=swap"></noscript>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="game-styles.css">
+    <script src="components.js"></script>
     <style>
         /* --- СТИЛИ ДЛЯ КОРЗИНЫ И ТОВАРОВ --- */
         main { max-width: 1200px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 5; display: flex; align-items: flex-start; gap: 30px; }
         .content-left { flex: 1; min-width: 0; }
-        .cart-right { width: 350px; position: sticky; top: 100px; background: rgba(30, 25, 38, 0.8); border: 1px solid #ff7eb3; border-radius: 20px; padding: 25px; box-shadow: 0 0 30px rgba(255, 126, 179, 0.15); backdrop-filter: blur(10px); max-height: calc(100vh - 120px); overflow-y: auto; box-sizing: border-box; }
+        .cart-right { width: 350px; position: sticky; top: calc(var(--header-h, 72px) + 24px); background: rgba(30, 25, 38, 0.8); border: 1px solid #ff7eb3; border-radius: 20px; padding: 25px; box-shadow: 0 0 30px rgba(255, 126, 179, 0.15); backdrop-filter: blur(10px); max-height: calc(100vh - var(--header-h, 72px) - 44px); overflow-y: auto; box-sizing: border-box; }
         .cart-right::-webkit-scrollbar { width: 4px; } .cart-right::-webkit-scrollbar-thumb { background: #ff7eb3; border-radius: 5px; }
         @media (max-width: 950px) { main { flex-direction: column; } .content-left { order: 1; } .cart-right { order: 2; width: 100%; position: static; max-height: none; margin-top: 24px; } }
 

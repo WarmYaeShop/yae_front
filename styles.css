@@ -368,8 +368,8 @@ body {
     animation: fadeIn 0.15s ease-out;
     margin: 0; padding: 0;
     width: 100%; height: 100%;
-    /* clip вместо hidden: hidden на body ломает sticky-шапку в iOS Safari
-       (шапка «уезжает» при скролле). clip режет так же, но не создаёт скролл-контейнер. */
+    /* clip вместо hidden: режет горизонтальный вылет так же, но не создаёт
+       лишний скролл-контейнер (с ним в iOS Safari ломались sticky-элементы). */
     overflow-x: hidden;
     overflow-x: clip;
     font-family: 'Roboto', sans-serif;
@@ -377,6 +377,10 @@ body {
     background-attachment: fixed;
     color: #ffffff;
 }
+/* Шапка вынута из потока (position: fixed) — освобождаем ей место сверху.
+   Класс ставит renderHeader(): страницам без шапки (оферта, 404) отступ не нужен.
+   Точную высоту уточняет JS — логотип Marck Script грузится позже и меняет её. */
+body.has-header { padding-top: var(--header-h, 72px); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .fade-out { opacity: 0 !important; transition: opacity 0.15s ease-in-out; }
 
@@ -436,8 +440,12 @@ body::before {
 }
 
 /* --- Шапка --- */
+/* position: fixed, а не sticky: sticky ломался там, где у body появлялся
+   свой скролл-контейнер (шапка «уезжала» вверх при прокрутке). Fixed ведёт
+   себя одинаково во всех браузерах. Высоту шапки кладём в --header-h
+   (считает JS в components.js) и на неё же отступаем сверху у body. */
 header {
-    position: sticky; top: 0; z-index: 100;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; justify-content: space-between; align-items: center;
     padding: 15px 40px;
     /* Без backdrop-filter: блюр на sticky-шапке пересчитывается каждый кадр скролла
@@ -703,10 +711,17 @@ footer {
 .reviews-container::-webkit-scrollbar { width: 4px; }
 .reviews-container::-webkit-scrollbar-thumb { background: #ff7eb3; border-radius: 4px; }
 
-@media (max-width: 900px) { .logo-container .header-btn { display: none; } }
+/* Кнопки в шапке прячем чуть раньше: с иконками они шире, и логотип начинал
+   переноситься на две строки (всё то же есть в боковом меню) */
+@media (max-width: 1180px) { .logo-container .header-btn { display: none; } }
+.logo-link { white-space: nowrap; }
 
 /* Safari (iOS) красит зону над адресной строкой фоном <html> — без этого она белая */
-html { background: #14101d; }
+html {
+    background: #14101d;
+    /* Якоря (#id) не должны прятаться под фиксированной шапкой */
+    scroll-padding-top: calc(var(--header-h, 72px) + 14px);
+}
 
 /* --- Трекер статуса заказа (Оплата → Выполняется → Готово) --- */
 .order-tracker { display: flex; align-items: center; margin-top: 12px; padding: 0 4px; }
@@ -732,6 +747,8 @@ html { background: #14101d; }
 
     /* Шапка тоньше и компактнее */
     header { padding: 7px 14px; }
+    /* Запасное значение до того, как JS измерит шапку (на телефоне она ниже) */
+    body.has-header { padding-top: var(--header-h, 54px); }
     .logo-link { font-size: 22px; margin-right: 4px; }
     .profile-btn { width: 37px; height: 37px; border-width: 1.5px; }
     .profile-btn svg { width: 19px; height: 19px; }
@@ -849,3 +866,110 @@ body.low-end-mode .how-card::after { display: none; }
 .gc-from { font-size: 13px; color: #6d5a7d; }
 .gc-from b { color: #a23c86; }
 .gc-fox { font-size: 28px; }
+
+/* ---------- Иконки сайта (SVG-спрайт из components.js) ---------- */
+.ic {
+    width: 18px; height: 18px; flex: 0 0 auto; display: inline-block; vertical-align: -3px;
+    fill: none; stroke: url(#ic-grad); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.ic.ic-white { stroke: #fff; }
+.header-btn { display: inline-flex; align-items: center; gap: 7px; }
+.header-btn .ic { width: 16px; height: 16px; transition: transform 0.3s; }
+.header-btn:hover .ic { transform: translateY(-1px) scale(1.12); }
+.menu-item-ic .ic { width: 22px; height: 22px; transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.menu-item:hover .menu-item-ic .ic { transform: scale(1.15) rotate(-6deg); }
+.side-menu-tg .ic { width: 19px; height: 19px; }
+
+/* ---------- Бегающая лисичка (маскот) ---------- */
+/* Цикл 40 с: ~11 с бежит слева направо, остальное время ждёт за краем экрана.
+   Анимируется только transform — дёшево для видеокарты. */
+#yae-fox {
+    position: fixed; left: 0; bottom: 6px; z-index: 45; pointer-events: none; /* выше зерна/виньетки (40–41), ниже модалок */
+    width: 84px; height: 56px;
+    transform: translateX(-120px);
+    animation: foxRun 40s linear 6s infinite;
+    filter: drop-shadow(0 4px 8px rgba(255, 126, 179, 0.35));
+}
+#yae-fox svg { width: 100%; height: 100%; display: block; overflow: visible; }
+@keyframes foxRun {
+    0%   { transform: translateX(-120px); }
+    28%  { transform: translateX(calc(100vw + 40px)); }
+    100% { transform: translateX(calc(100vw + 40px)); }
+}
+.fox-bob { width: 100%; height: 100%; animation: foxBob 0.32s ease-in-out infinite alternate; }
+@keyframes foxBob { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+.fox-leg { transform-box: fill-box; transform-origin: 50% 10%; animation: foxLeg 0.32s ease-in-out infinite alternate; }
+.leg-f1, .leg-b2 { animation-direction: alternate-reverse; }
+@keyframes foxLeg { from { transform: rotate(28deg); } to { transform: rotate(-28deg); } }
+.fox-tail { transform-box: fill-box; transform-origin: 95% 90%; animation: foxTail 0.64s ease-in-out infinite alternate; }
+@keyframes foxTail { from { transform: rotate(-7deg); } to { transform: rotate(9deg); } }
+.fox-head { transform-box: fill-box; transform-origin: 30% 80%; animation: foxHead 0.64s ease-in-out infinite alternate; }
+@keyframes foxHead { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+@media (max-width: 768px) { #yae-fox { width: 64px; height: 43px; bottom: 4px; } }
+/* Корзина-кнопка на телефоне внизу — лисичка пробегает под ней, не мешая кликам */
+body.low-end-mode #yae-fox { display: none; }
+@media (prefers-reduced-motion: reduce) { #yae-fox { display: none; } }
+
+/* ---------- Личный кабинет: мягкий персиковый акцент + плавные переходы ---------- */
+/* Яркий розовый #ff7eb3 здесь заменён на персиковый #ffb3b3 (он уже есть в палитре
+   каталога). Всё ограничено #auth-modal — остальной сайт не меняется. */
+#auth-modal { --peach: #ffb3b3; --peach-2: #ff9ec6; --peach-ink: #3a1f33; }
+#auth-modal .custom-modal {
+    border-color: rgba(255, 179, 179, 0.45);
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.45), 0 0 30px rgba(255, 179, 179, 0.12);
+    transform: translateY(18px) scale(0.97); opacity: 0;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+#auth-modal.active .custom-modal { transform: none; opacity: 1; }
+#auth-modal .close-modal-btn { color: var(--peach); }
+
+#auth-modal .auth-avatar {
+    border-color: var(--peach); box-shadow: 0 0 20px rgba(255, 179, 179, 0.25);
+    animation: authAvatarIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+#auth-modal #auth-login-view .auth-avatar svg { stroke: var(--peach); }
+#auth-modal .auth-avatar-on { border-color: #4dff88; box-shadow: 0 0 20px rgba(77, 255, 136, 0.3); }
+@keyframes authAvatarIn { from { transform: scale(0.85); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Вкладки: подсветка не «перещёлкивается», а плавно переезжает */
+#auth-modal .auth-tabs { position: relative; }
+#auth-modal .auth-tabs::before {
+    content: ''; position: absolute; top: 5px; bottom: 5px; left: 5px;
+    width: calc(50% - 8px); border-radius: 8px;
+    background: linear-gradient(90deg, var(--peach), var(--peach-2));
+    box-shadow: 0 4px 14px rgba(255, 179, 179, 0.28);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#auth-modal .auth-tabs.tg-active::before { transform: translateX(calc(100% + 6px)); }
+#auth-modal .auth-tab { position: relative; z-index: 1; transition: color 0.35s ease; }
+#auth-modal .auth-tab.active { background: transparent; box-shadow: none; color: var(--peach-ink); }
+
+/* Смена панели / вида — мягкое всплытие вместо резкого появления */
+#auth-modal .auth-pane,
+#auth-modal #auth-login-view,
+#auth-modal #auth-account-view { animation: authPaneIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes authPaneIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+#auth-modal .auth-input:focus { border-color: var(--peach); box-shadow: 0 0 0 3px rgba(255, 179, 179, 0.16); }
+#auth-modal .auth-btn-primary,
+#auth-modal .ref-copy-btn {
+    background: linear-gradient(90deg, var(--peach), var(--peach-2)); color: var(--peach-ink);
+    box-shadow: 0 6px 18px rgba(255, 179, 179, 0.22);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+#auth-modal .auth-btn-primary:hover,
+#auth-modal .ref-copy-btn:hover { box-shadow: 0 8px 22px rgba(255, 179, 179, 0.34); filter: brightness(1.04); }
+#auth-modal #auth-account-name,
+#auth-modal .ref-stat b,
+#auth-modal .tier-next b { color: var(--peach); }
+#auth-modal .tier-progress-fill {
+    background: linear-gradient(90deg, var(--peach), var(--peach-2));
+    box-shadow: 0 0 10px rgba(255, 179, 179, 0.4);
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#auth-modal .ref-panel { background: rgba(255, 179, 179, 0.05); }
+@media (prefers-reduced-motion: reduce) {
+    #auth-modal .custom-modal, #auth-modal .auth-tabs::before { transition: none; }
+    #auth-modal .auth-pane, #auth-modal #auth-login-view, #auth-modal #auth-account-view, #auth-modal .auth-avatar { animation: none; }
+}
+body.low-end-mode #auth-modal .tier-progress-fill { transition: none; }

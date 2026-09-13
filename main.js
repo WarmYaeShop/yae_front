@@ -726,6 +726,9 @@ function switchAuthTab(tab) {
     document.getElementById('auth-tab-tg').classList.toggle('active', !isEmail);
     document.getElementById('auth-pane-email').style.display = isEmail ? 'block' : 'none';
     document.getElementById('auth-pane-tg').style.display = isEmail ? 'none' : 'block';
+    // Сдвигает плавающую подсветку вкладок (см. #auth-modal .auth-tabs::before)
+    const tabs = document.querySelector('#auth-modal .auth-tabs');
+    if (tabs) tabs.classList.toggle('tg-active', !isEmail);
 }
 // --- СОХРАНЕНИЕ КОРЗИНЫ (переживает перезагрузку страницы, живёт 3 дня) ---
 function saveCartState(game, method, cart) {

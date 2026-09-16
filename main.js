@@ -999,17 +999,23 @@ function logout() { localStorage.removeItem('tg_user'); localStorage.removeItem(
 // === Товары: категории + карточки (общий рендер для всех игр) ===
 let PRODUCT_META = {};
 let CATEGORY_ICONS = {};
+// {игра: {товар: файл}} — картинки, назначенные админом в боте (/products).
+// Товары приходят из Google-таблицы, в коде страниц их нет, поэтому картинку
+// ищем сначала здесь и только потом по правилам getIcon() на странице игры.
+let PRODUCT_IMAGES = {};
 let DISCOUNTS_DATA = {};
 async function loadProductMeta() {
     // Все три запроса — параллельно (быстрее загрузка товаров)
-    const [disc, meta, icons] = await Promise.all([
+    const [disc, meta, icons, pimgs] = await Promise.all([
         fetch('/api/discounts').then(r => r.json()).catch(() => ({})),
         Object.keys(PRODUCT_META).length ? Promise.resolve(PRODUCT_META) : fetch('/api/product_meta').then(r => r.json()).catch(() => ({})),
-        fetch('/api/category_icons').then(r => r.json()).catch(() => ({}))
+        fetch('/api/category_icons').then(r => r.json()).catch(() => ({})),
+        fetch('/api/product_images').then(r => r.json()).catch(() => ({}))
     ]);
     DISCOUNTS_DATA = disc || {};
     PRODUCT_META = meta || {};
     CATEGORY_ICONS = icons || {};
+    PRODUCT_IMAGES = pimgs || {};
 }
 function catLabel(cat) {
     const ic = CATEGORY_ICONS[cat];
@@ -1037,9 +1043,24 @@ function productCardHTML(name, price, icon, nameDecorator, discounts) {
             </div>
         </div></div>`;
 }
-function renderGroupedProducts(gridId, serverPrices, method, game, getIcon, nameDecorator, discounts) {
+// Картинка товара: сначала назначенная в боте, иначе — правила страницы игры.
+// components.js подменит images/<файл> на ссылку из БД (/api/images).
+function productIcon(game, fallbackGetIcon) {
+    const files = PRODUCT_IMAGES[game] || {};
+    return function (name) {
+        const f = files[name];
+        if (!f) return fallbackGetIcon(name);
+        const alt = String(fallbackGetIcon(name)).replace(/"/g, '&quot;');
+        return '<img src="images/' + f + '" loading="lazy" alt="" ' +
+            'onerror="this.onerror=null;this.outerHTML=this.dataset.fb" ' +
+            'data-fb="' + alt + '" style="width:100%;height:100%;object-fit:contain;">';
+    };
+}
+
+function renderGroupedProducts(gridId, serverPrices, method, game, getIconRaw, nameDecorator, discounts) {
     const grid = document.getElementById(gridId);
     if (!grid) return;
+    const getIcon = productIcon(game, getIconRaw);
     const meta = PRODUCT_META[game] || {};
     const cur = serverPrices[method] || {};
     const otherMethod = method === 'uid' ? 'login' : 'uid';

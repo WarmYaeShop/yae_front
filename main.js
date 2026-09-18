@@ -1051,9 +1051,12 @@ function productIcon(game, fallbackGetIcon) {
         const f = files[name];
         if (!f) return fallbackGetIcon(name);
         const alt = String(fallbackGetIcon(name)).replace(/"/g, '&quot;');
+        // Размеры и свечение — ровно как у стандартных иконок товаров на страницах игр,
+        // иначе назначенная в боте картинка выглядит крупнее и без подсветки
         return '<img src="images/' + f + '" loading="lazy" alt="" ' +
             'onerror="this.onerror=null;this.outerHTML=this.dataset.fb" ' +
-            'data-fb="' + alt + '" style="width:100%;height:100%;object-fit:contain;">';
+            'data-fb="' + alt + '" style="width: 130px; height: 130px; object-fit: contain; ' +
+            'filter: drop-shadow(0 0 15px rgba(255, 126, 179, 0.6)); margin-top: -10px;">';
     };
 }
 

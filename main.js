@@ -660,7 +660,8 @@ function initGameIconPetals() {
         box.appendChild(layer);
     });
 }
-document.addEventListener('DOMContentLoaded', initGameIconPetals);
+// Пока выключено — решаем, как должно выглядеть. Вернуть: раскомментировать строку ниже.
+// document.addEventListener('DOMContentLoaded', initGameIconPetals);
 
 function createPetal() {
     const fx = fxMode();

@@ -17,6 +17,7 @@
     </style>
     <!-- Шрифты с нашего сервера; предзагружаем то, что видно сразу: логотип и русский текст -->
     <link rel="preload" href="/static/fonts/marckscript-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/chewy-yae.woff" as="font" type="font/woff" crossorigin>
     <link rel="preload" href="/static/fonts/roboto-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="game-styles.css">
@@ -153,7 +154,7 @@
                 <div class="section-label">Игровые данные</div>
                 <div class="input-group form-container active" id="form-login">
                     <div class="input-row">
-                        <div class="input-field"><label>Почта (Логин)</label><input type="text" id="login-input"></div>
+                        <div class="input-field"><label>Почта (Логин)</label><input type="text" id="login-input" class="ym-disable-keys ym-hide-content"></div>
                         <div class="input-field"><label>Пароль</label><input type="password" id="password-input"></div>
                     </div>
 

@@ -6,15 +6,15 @@
    Google Fonts из России отвечает медленно и нестабильно. Только кириллица и
    латиница; unicode-range — браузер качает лишь те файлы, чьи символы есть на
    странице. У Roboto один «вариативный» файл сразу на 400 и 700. */
-/* Логотип «Donate by Yae Miko» — Chewy (Google Fonts, OFL) с чуть увеличенной
-   «дыркой» в заглавной D (правка глифа через fontTools, семейство переименовано
-   в «Chewy Yae», чтобы не путать с оригиналом). Только латиница. */
+/* Логотип «Donate by Yae Miko» — Grandstander Bold (Google Fonts, OFL) с чуть
+   увеличенной «дыркой» в заглавной D (правка глифа через fontTools, семейство
+   переименовано в «Grandstander Yae»). Внутри только базовая латиница (17 КБ). */
 @font-face {
-  font-family: 'Chewy Yae';
+  font-family: 'Grandstander Yae';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 700;
   font-display: swap;
-  src: url(static/fonts/chewy-yae.woff) format('woff');
+  src: url(static/fonts/grandstander-yae.woff) format('woff');
 }
 /* Marck Script 400 — cyrillic */
 @font-face {
@@ -585,7 +585,7 @@ header {
 }
 .logo-container { display: flex; align-items: center; gap: 15px; }
 .logo-link {
-    font-family: 'Chewy Yae', 'Marck Script', cursive; font-size: 33px;
+    font-family: 'Grandstander Yae', 'Marck Script', cursive; font-weight: 700; font-size: 30px;
     text-decoration: none; letter-spacing: 0.5px;
     /* Как цифры на карточках товаров: светло-розовая заливка, розовый контур,
        мягкое свечение. paint-order — контур рисуется под заливкой, буквы не худеют */
@@ -885,7 +885,7 @@ html {
     header { padding: 7px 14px; }
     /* Запасное значение до того, как JS измерит шапку (на телефоне она ниже) */
     body.has-header { padding-top: var(--header-h, 54px); }
-    .logo-link { font-size: 21px; margin-right: 4px; -webkit-text-stroke-width: 1px; }
+    .logo-link { font-size: 19px; margin-right: 4px; -webkit-text-stroke-width: 1px; }
     .profile-btn { width: 37px; height: 37px; border-width: 1.5px; }
     .profile-btn svg { width: 19px; height: 19px; }
     .hamburger { gap: 5px; }
@@ -1140,7 +1140,7 @@ body.low-end-mode #auth-modal .tier-progress-fill { transition: none; }
    оставляем только стрелку в кружке, логотип чуть меньше */
 @media (max-width: 420px) {
     .header-right { gap: 12px; }
-    .logo-link { font-size: 19px; }
+    .logo-link { font-size: 17px; }
     .header-back { margin-right: 0; width: 34px; height: 34px; justify-content: center; border-radius: 50%; background: rgba(255, 126, 179, 0.1); font-size: 18px; }
     .header-back span { display: none; }
 }

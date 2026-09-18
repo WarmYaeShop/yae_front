@@ -623,6 +623,45 @@ const PETAL_PALETTES = [
     'linear-gradient(135deg, #ffb7d5 0%, #ff7eb3 100%)', // основной
     'linear-gradient(135deg, #ff9ec7 0%, #ff5fa2 100%)'  // насыщенный
 ];
+// --- Лепестки внутри иконок игр (главная) ---
+// На самих иконках сакура нарисована, но стоит на месте. Поверх пускаем несколько
+// живых лепестков — та же форма, палитра и покачивание (petal-sway), что у
+// лепестков по всему сайту, поэтому они выглядят как часть одного «ветра».
+// Выключаются вместе с остальными: «Лепестки» в настройках, «Эконом», reduced-motion.
+function initGameIconPetals() {
+    const boxes = document.querySelectorAll('.game-icon-container');
+    boxes.forEach((box, bi) => {
+        if (box.querySelector('.gi-petals')) return;
+        const layer = document.createElement('div');
+        layer.className = 'gi-petals';
+        layer.setAttribute('aria-hidden', 'true');
+        const n = 4;
+        for (let i = 0; i < n; i++) {
+            const col = document.createElement('span');
+            col.className = 'gi-col';
+            const dur = 6 + Math.random() * 3;                       // 6–9 с на пролёт
+            col.style.left = (8 + (84 / n) * i + Math.random() * 12).toFixed(1) + '%';
+            col.style.animationDuration = dur.toFixed(1) + 's';
+            // отрицательная задержка — к моменту открытия лепестки уже «в полёте»,
+            // и у соседних карточек они не синхронны
+            col.style.animationDelay = (-(Math.random() * dur) - bi * 0.7).toFixed(2) + 's';
+            const p = document.createElement('span');
+            p.className = 'gi-petal';
+            const size = 10 + Math.random() * 5;                      // 10–15 px
+            p.style.width = size.toFixed(1) + 'px';
+            p.style.height = (size * 0.8).toFixed(1) + 'px';
+            p.style.background = PETAL_PALETTES[(i + bi) % PETAL_PALETTES.length];
+            p.style.setProperty('--petal-opacity', (0.7 + Math.random() * 0.25).toFixed(2));
+            p.style.setProperty('--sway', (6 + Math.random() * 8).toFixed(0) + 'px');
+            p.style.setProperty('--sway-duration', (2.2 + Math.random() * 1.4).toFixed(1) + 's');
+            col.appendChild(p);
+            layer.appendChild(col);
+        }
+        box.appendChild(layer);
+    });
+}
+document.addEventListener('DOMContentLoaded', initGameIconPetals);
+
 function createPetal() {
     const fx = fxMode();
     if (localStorage.getItem('setting_petals') === 'false' || fx === 'low') return;
@@ -1099,7 +1138,7 @@ function renderGroupedProducts(gridId, serverPrices, method, game, getIconRaw, n
     window.__catCtx = { groups, cur, getIcon, nameDecorator, discounts, allNow, availNow, otherLabel };
 
     grid.classList.add('grouped');
-    const searchBox = `<input class="prod-search" id="prod-search" type="search" placeholder="🔍 Поиск товара…" autocomplete="off" oninput="searchProducts(this.value)">`;
+    const searchBox = `<label class="prod-search-wrap">${icon('search', 'prod-search-ic')}<input class="prod-search" id="prod-search" type="search" placeholder="Поиск товара…" autocomplete="off" oninput="searchProducts(this.value)"></label>`;
     const chips = searchBox + `<div class="cat-tabs"><button class="cat-tab active" data-cat="__all" onclick="filterCategory(this)">Все <span class="cat-count">${allNow.length}</span></button>` +
         order.map(c => {
             const cnt = groups[c].filter(availNow).length;

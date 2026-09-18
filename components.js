@@ -225,6 +225,7 @@ const ICON_SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hi
   <symbol id="ic-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="#1c1526"/><circle cx="15.5" cy="12" r="2" fill="#1c1526"/><circle cx="8" cy="17" r="2" fill="#1c1526"/></symbol>
   <symbol id="ic-plane" viewBox="0 0 24 24"><path d="M21 3.5L2.8 10.6l6.4 2.3zM21 3.5l-11.8 9.4.7 6.6 3.1-4.4zM21 3.5l-3.4 16-4.7-4.6"/></symbol>
   <symbol id="ic-sakura" viewBox="0 0 24 24"><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z"/><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z" transform="rotate(72 12 12)"/><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z" transform="rotate(144 12 12)"/><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z" transform="rotate(216 12 12)"/><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z" transform="rotate(288 12 12)"/><circle cx="12" cy="12" r="1.3"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20 20"/></symbol>
   <symbol id="ic-mail" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.8 7.2l8.2 6 8.2-6"/></symbol>
   <symbol id="ic-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></symbol>
   <symbol id="ic-pen" viewBox="0 0 24 24"><path d="M4 20l1-4.5L15.5 5a2.1 2.1 0 0 1 3 3L8 18.5z"/><path d="M13.5 7l3 3"/></symbol>

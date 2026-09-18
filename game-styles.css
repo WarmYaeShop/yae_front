@@ -258,6 +258,15 @@ body.low-end-mode .prod-grid .product-card { animation: none; }
 }
 .prod-search:focus { border-color: #ff7eb3; }
 .prod-search::placeholder { color: #7c7090; }
+/* Лупа — иконка сайта (SVG из components.js), а не эмодзи в placeholder */
+.prod-search-wrap { position: relative; display: block; margin-bottom: 14px; }
+.prod-search-wrap .prod-search { margin-bottom: 0; padding-left: 42px; }
+.prod-search-wrap .prod-search-ic {
+    position: absolute; left: 14px; top: 50%; width: 18px; height: 18px;
+    transform: translateY(-50%); pointer-events: none; opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
+}
+.prod-search-wrap:focus-within .prod-search-ic { opacity: 1; transform: translateY(-50%) scale(1.1); }
 
 /* --- Мобилка: 2 товара в строке ---
    Карточки были мелковаты: поля страницы уже (12px вместо 20px), а иконка,

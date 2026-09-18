@@ -1165,3 +1165,32 @@ body.low-end-mode #auth-modal .tier-progress-fill { transition: none; }
 .fox-bubble-out { animation: foxBubbleOut 0.3s ease forwards; }
 @keyframes foxBubbleIn { from { opacity: 0; margin-bottom: -6px; } to { opacity: 1; margin-bottom: 0; } }
 @keyframes foxBubbleOut { to { opacity: 0; margin-bottom: -6px; } }
+
+/* ---------- Живые лепестки внутри иконок игр (главная) ---------- */
+/* Колонка высотой с иконку едет сверху вниз (translateY в % = % высоты иконки),
+   лепесток внутри покачивается той же анимацией petal-sway, что и по всему сайту.
+   Только transform/opacity — дёшево. */
+.game-icon-container { position: relative; }
+.gi-petals { position: absolute; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+.gi-col {
+    position: absolute; top: 0; height: 100%; width: 14px;
+    animation: giFall 7s linear infinite;
+    will-change: transform;
+}
+@keyframes giFall {
+    0%   { transform: translate(0, -12%); opacity: 0; }
+    8%   { opacity: 1; }
+    88%  { opacity: 1; }
+    100% { transform: translate(-14px, 104%); opacity: 0; }  /* лёгкий снос ветром влево */
+}
+.gi-petal {
+    display: block; border-radius: 100% 0 100% 0;
+    opacity: var(--petal-opacity, 0.85);
+    /* светлый ореол — иначе розовый лепесток сливается с розовым фоном иконки */
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35), 0 1px 6px rgba(120, 40, 90, 0.35);
+    animation: petal-sway var(--sway-duration, 3s) ease-in-out infinite alternate;
+}
+/* Выключаются вместе с остальными лепестками сайта */
+body.no-petals .gi-petals,
+body.low-end-mode .gi-petals { display: none; }
+@media (prefers-reduced-motion: reduce) { .gi-petals { display: none; } }

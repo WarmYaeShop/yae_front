@@ -472,7 +472,19 @@ function renderHeader(isGamePage = false) {
                         <input id="ref-link" class="auth-input" readonly value="" style="margin-bottom:0;">
                         <button id="ref-copy-btn" onclick="copyRefLink()" class="ref-copy-btn">Копировать</button>
                     </div>
-                    <p class="auth-hint" style="margin-top:8px;">Вы оба получите −3% скидку: друг — на первый заказ, вы — на следующий</p>
+                    <p class="auth-hint" style="margin-top:8px;">
+                        Вы оба получаете <b>−3%</b>: друг — на первый заказ, вы — на следующий.
+                        Потолка нет: чем крупнее заказ друга, тем больше вернётся вам.
+                        <button type="button" class="ref-why-btn" onclick="toggleRefWhy(this)"
+                                aria-expanded="false" aria-controls="ref-why" title="Почему не больше?">?</button>
+                    </p>
+                    <div id="ref-why" class="ref-why" hidden>
+                        <b>Почему 3%, а не 10%?</b><br>
+                        Мы не производим донат — мы его покупаем. За сам товар уходит почти вся сумма
+                        заказа, магазину остаётся около 10%. Поэтому «10% другу и 10% вам», как обещают
+                        некоторые, никто выдать не может — это работа в убыток. Мы отдаём столько,
+                        сколько правда можем.
+                    </div>
                 </div>
 
                 <div class="promo-panel" style="background: rgba(20,15,30,0.7); border: 1px solid #3a2b4d; border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;">

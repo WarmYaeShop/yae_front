@@ -891,6 +891,15 @@ function renderTier(t) {
         nextEl.innerHTML = `Максимальный уровень! 🎉 Потрачено <b>${t.spent}₽</b>`;
     }
 }
+// Объяснение «почему процент маленький» под вопросиком. Свёрнуто по
+// умолчанию: любопытным — ответ, остальным — не мешает.
+function toggleRefWhy(btn) {
+    const el = document.getElementById('ref-why');
+    if (!el) return;
+    const opening = el.hasAttribute('hidden');
+    if (opening) el.removeAttribute('hidden'); else el.setAttribute('hidden', '');
+    if (btn) btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+}
 function copyRefLink() {
     const i = document.getElementById('ref-link');
     if (!i) return;

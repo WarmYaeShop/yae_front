@@ -483,6 +483,23 @@ body.low-end-mode .preloader-logo, body.low-end-mode .preloader-bar::after { ani
 }
 .ref-copy-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(179,0,179,0.4); }
 
+/* Вопросик «почему процент маленький» и раскрывающийся ответ */
+.ref-why-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; padding: 0; margin-left: 4px; vertical-align: -3px;
+    border: 1px solid #5a4b6d; border-radius: 50%; background: #15101d;
+    color: #d8c3e0; font-size: 11px; font-weight: bold; line-height: 1;
+    cursor: pointer; transition: 0.2s;
+}
+.ref-why-btn:hover { border-color: #ff7eb3; color: #ff7eb3; }
+.ref-why-btn:focus-visible { outline: 2px solid #ff7eb3; outline-offset: 2px; }
+.ref-why {
+    margin-top: 10px; padding: 10px 12px; border-radius: 10px;
+    background: #15101d; border: 1px solid #3a2b4d;
+    color: #a89bb8; font-size: 11px; line-height: 1.6; text-align: left;
+}
+.ref-why b { color: #d8c3e0; }
+
 /* Реф-блок в оформлении заказа */
 .ref-checkout-box {
     background: rgba(255,126,179,0.08); border: 1px solid #4a3b5d;

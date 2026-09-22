@@ -27,6 +27,17 @@
         if (!root || !root.querySelectorAll) return;
         if (root.tagName === 'IMG') swap(root);
         root.querySelectorAll('img').forEach(swap);
+        applyDecor();
+    }
+    // Ветка сакуры — это фон (background-image в styles.css), а не <img>,
+    // поэтому её подмену из бота («🌸 Оформление») ставим отдельно
+    function applyDecor() {
+        var url = window.__imgMap['sakura_tree.webp'];
+        var tree = document.getElementById('sakura-tree');
+        if (url && tree && tree.dataset.cdnDone !== url) {
+            tree.dataset.cdnDone = url;
+            tree.style.backgroundImage = "url('" + url + "')";
+        }
     }
     // Наблюдаем за появлением новых <img> (карточки товаров рисуются после fetch)
     var mo = new MutationObserver(function (muts) {
@@ -357,6 +368,18 @@ function renderHeader(isGamePage = false) {
                 </div>
                 <div id="fx-auto-hint" style="color:#7c7090;font-size:11px;margin-top:6px;min-height:14px;"></div>
             </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="pay-modal" onclick="closeModal('pay-modal', event)">
+        <div class="custom-modal pay-card" onclick="event.stopPropagation()">
+            <button class="close-modal-btn" onclick="closeModal('pay-modal')">×</button>
+            <div class="pay-status"><span class="pay-dot"></span>Ожидает оплаты</div>
+            <h2 id="pay-title">Заказ оформлен</h2>
+            <p class="pay-sub">Выберите способ оплаты</p>
+            <div class="pay-methods" id="pay-methods"></div>
+            <div class="pay-timer" id="pay-timer"></div>
+            <p class="pay-note">Окно можно закрыть — оплатить получится позже в «Мои заказы».<br>Если уже оплатили — не платите повторно: статус обновится сам.</p>
         </div>
     </div>
 

@@ -486,20 +486,21 @@
                 is_urgent: isUrgent,
                 login: loginEmail,
                 password: loginPassword,
-                promo_code: localStorage.getItem('promo_code_applied') || ''
+                promo_code: localStorage.getItem('promo_code_applied') || '',
+                choose_method: true   // сервер пришлёт способы оплаты вместо готовой ссылки
             };
 
             checkoutBusy = true;
             const btn = document.querySelector('#step-details .checkout-btn');
             const originalText = btn.innerText;
-            btn.classList.add('btn-loading'); btn.innerText = 'Создаём ссылку на оплату'; btn.disabled = true;
+            btn.classList.add('btn-loading'); btn.innerText = 'Оформляем заказ'; btn.disabled = true;
 
             try {
                 const response = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await response.json();
                 if (data.status === 'success') {
                     localStorage.removeItem('promo_code_applied'); // промокод потрачен
-                    if (data.payment_url) { window.location.href = data.payment_url; } else { showOrderSuccess(currentMethod); cart = {}; updateCartUI(); prevStep(); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false; }
+                    if (data.payment_url) { window.location.href = data.payment_url; } else if (data.methods && data.methods.length) { cart = {}; updateCartUI(); prevStep(); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false; openPayModal(data); } else { showOrderSuccess(currentMethod); cart = {}; updateCartUI(); prevStep(); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false; }
                 } else {
                     toast(data.message || data.detail || "Не удалось оформить заказ. Попробуйте ещё раз.", "error"); btn.innerText = originalText; btn.disabled = false; btn.classList.remove('btn-loading'); checkoutBusy = false;
                 }

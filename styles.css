@@ -1223,3 +1223,67 @@ body.low-end-mode #auth-modal .tier-progress-fill { transition: none; }
 body.no-petals .gi-petals,
 body.low-end-mode .gi-petals { display: none; }
 @media (prefers-reduced-motion: reduce) { .gi-petals { display: none; } }
+
+/* ---------- Окно «Ожидает оплаты»: выбор СБП / карта ---------- */
+.pay-card { max-width: 440px; width: 94%; text-align: center; }
+.pay-status {
+    display: inline-flex; align-items: center; gap: 8px; margin: 2px auto 10px;
+    padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;
+    color: #ffd24d; background: rgba(255, 210, 77, 0.1); border: 1px solid rgba(255, 210, 77, 0.3);
+}
+.pay-dot { width: 7px; height: 7px; border-radius: 50%; background: #ffd24d; animation: payPulse 1.4s ease-in-out infinite; }
+@keyframes payPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.7); } }
+.pay-card h2 { margin: 0 0 4px; font-size: 22px; }
+.pay-sub { color: #a097b0; font-size: 14px; margin: 0 0 18px; }
+.pay-methods { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.pay-method {
+    display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; text-align: left;
+    border-radius: 16px; cursor: pointer; font-family: inherit; color: #fff;
+    border: 1px solid transparent;
+    background: linear-gradient(145deg, #241c30, #181320) padding-box,
+                linear-gradient(145deg, #4a3b5d, #2a2036) border-box;
+    transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.pay-method:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: linear-gradient(145deg, #2a2138, #1b1524) padding-box,
+                linear-gradient(145deg, #ff7eb3, #b300b3) border-box;
+    box-shadow: 0 8px 22px rgba(255, 126, 179, 0.25);
+}
+.pay-method:active:not(:disabled) { transform: scale(0.98); }
+.pay-method:disabled { opacity: 0.55; cursor: default; }
+.pay-method.loading { opacity: 1; }
+.pay-method.loading .pm-sum { opacity: 0.4; }
+.pay-method.loading .pm-ic { animation: payPulse 0.9s ease-in-out infinite; }
+.pm-ic {
+    width: 46px; height: 46px; flex-shrink: 0; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(255, 126, 179, 0.2), rgba(179, 110, 255, 0.2));
+    border: 1px solid rgba(255, 126, 179, 0.3);
+}
+.pm-ic .ic { width: 24px; height: 24px; }
+.pm-body { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.pm-body b { font-size: 16px; }
+.pm-body small { color: #a097b0; font-size: 12px; }
+.pm-sum { display: flex; flex-direction: column; align-items: flex-end; font-weight: bold; font-size: 17px; color: #ff9ec6; white-space: nowrap; }
+.pm-sum small { font-size: 11px; color: #ffd24d; font-weight: bold; margin-top: 2px; }
+.pm-warn {
+    display: flex; align-items: center; gap: 2px; margin: -4px 4px 2px; font-size: 12px; color: #ffd24d; line-height: 1.4;
+}
+.pm-warn .ic { stroke: #ffd24d; }
+.pay-timer {
+    margin-top: 16px; padding: 10px 12px; border-radius: 12px; font-size: 13px; color: #d8c3e0;
+    background: rgba(255, 255, 255, 0.03); border: 1px dashed #4a3b5d;
+    text-align: center; line-height: 1.5;   /* обычный текст: не рвётся на куски, как во flex */
+}
+.pay-timer:empty { display: none; }
+.pay-timer b { color: #fff; font-variant-numeric: tabular-nums; }
+.pay-timer.expired { color: #ff8080; border-color: rgba(255, 77, 77, 0.4); }
+.pay-note { color: #7c7090; font-size: 11.5px; line-height: 1.5; margin: 14px 0 0; }
+.order-pay-left { margin-top: 10px; font-size: 12px; color: #ffd24d; display: flex; align-items: center; }
+.order-pay-left .ic { stroke: #ffd24d; }
+@media (max-width: 420px) {
+    .pay-method { padding: 12px; gap: 11px; }
+    .pm-ic { width: 40px; height: 40px; }
+    .pm-sum { font-size: 15px; }
+}

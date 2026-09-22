@@ -224,10 +224,95 @@ function reorderById(id) {
 }
 // «Оплатить» в истории заказов: свежая ссылка на оплату для заказов,
 // которые ждут оплаты или завершились ошибкой (старая ссылка могла протухнуть)
-async function repayOrder(id, btn) {
+// ================= Оплата: выбор способа (СБП / карта) =================
+// Сервер после оформления не создаёт ссылку сразу, а присылает способы и суммы
+// (для карты — уже с комиссией). Клиент выбирает — запрашиваем ссылку на этот
+// способ. pay_token — подпись заказа: гость без входа может оплатить только свой.
+let _pay = null, _payTimer = null;
+function _rub(v) { return Number(v).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ₽'; }
+function openPayModal(d) {
+    _pay = { id: d.order_id, token: d.pay_token, deadline: d.expires_in != null ? Date.now() + d.expires_in * 1000 : null };
+    document.getElementById('pay-title').textContent = 'Заказ #S' + d.order_id + ' оформлен';
+    const base = (d.methods || []).find(m => !m.fee);
+    document.getElementById('pay-methods').innerHTML = (d.methods || []).map(m => {
+        const isCard = m.id === 'card';
+        const sub = isCard ? 'Visa, Mastercard, Мир' : 'Через приложение банка · без комиссии';
+        const extra = base && m.fee ? Math.round((m.amount - base.amount) * 100) / 100 : 0;
+        return `<button class="pay-method pm-${m.id}" onclick="payWith('${m.id}', this)">
+                <span class="pm-ic">${icon(isCard ? 'card' : 'bolt')}</span>
+                <span class="pm-body"><b>${m.title}</b><small>${sub}</small></span>
+                <span class="pm-sum">${_rub(m.amount)}${m.fee ? `<small>+${m.fee}%</small>` : ''}</span>
+            </button>` + (m.fee ? `<div class="pm-warn">${icon('alert', 'ic-in')}Комиссия банка ${m.fee}%${extra ? ` (+${_rub(extra)})` : ''} добавлена к сумме заказа</div>` : '');
+    }).join('');
+    _payTick();
+    clearInterval(_payTimer);
+    _payTimer = setInterval(_payTick, 1000);
+    showModal('pay-modal');
+}
+function _payTick() {
+    const el = document.getElementById('pay-timer');
+    if (!el || !_pay) return;
+    if (_pay.deadline == null) { el.innerHTML = ''; return; }
+    const left = Math.max(0, Math.round((_pay.deadline - Date.now()) / 1000));
+    if (left <= 0) {
+        clearInterval(_payTimer);
+        el.classList.add('expired');
+        el.innerHTML = icon('clock', 'ic-in') + 'Время на оплату вышло — заказ отменён. Оформите его заново.';
+        document.querySelectorAll('#pay-methods .pay-method').forEach(b => b.disabled = true);
+        return;
+    }
+    el.classList.remove('expired');
+    const mm = String(Math.floor(left / 60)).padStart(2, '0'), ss = String(left % 60).padStart(2, '0');
+    el.innerHTML = icon('clock', 'ic-in') + `Заказ отменится через <b>${mm}:${ss}</b>, если его не оплатить`;
+}
+async function payWith(method, btn) {
+    if (!_pay) return;
+    const all = document.querySelectorAll('#pay-methods .pay-method');
+    all.forEach(b => b.disabled = true);
+    btn.classList.add('loading');
+    try {
+        const res = await fetch('/api/orders/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: _pay.id, pay_token: _pay.token, method })
+        });
+        const data = await res.json();
+        if (data.payment_url) { window.location.href = data.payment_url; return; }
+        toast(data.message || data.detail || 'Не удалось создать ссылку на оплату', 'error');
+    } catch (e) {
+        toast('Ошибка соединения. Попробуйте ещё раз', 'error');
+    }
+    btn.classList.remove('loading');
+    all.forEach(b => b.disabled = false);
+    _payTick();
+}
+// «Оплатить» в «Мои заказы» — то же окно выбора способа
+async function openPayForOrder(id, token, btn) {
+    if (!confirm('Если вы УЖЕ оплатили этот заказ — не оплачивайте повторно: статус обновится сам в течение пары минут.\n\nПерейти к оплате?')) return;
+    if (btn) btn.disabled = true;
+    try {
+        const res = await fetch('/api/orders/pay_options', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: id, pay_token: token })
+        });
+        if (res.status === 404 || res.status === 405) { if (btn) btn.disabled = false; return repayOrder(id, btn, true); }
+        const data = await res.json();
+        if (data.methods) {
+            closeModal('orders-modal'); openPayModal(data);
+            document.getElementById('pay-title').textContent = 'Оплата заказа #S' + data.order_id;
+        }
+        else toast(data.message || data.detail || 'Не удалось открыть оплату', 'error');
+    } catch (e) {
+        toast('Ошибка соединения. Попробуйте ещё раз', 'error');
+    }
+    if (btn) btn.disabled = false;
+}
+
+async function repayOrder(id, btn, skipConfirm) {
     // Защита от случайной двойной оплаты: если человек уже оплатил, а статус
     // ещё не дошёл (колбэк платёжки может запоздать на пару минут) — предупреждаем
-    if (!confirm('Если вы УЖЕ оплатили этот заказ — не оплачивайте повторно: статус обновится сам в течение пары минут.\n\nЕщё не оплачивали? Тогда жмите «ОК» — создадим новую ссылку на оплату.')) return;
+    if (!skipConfirm && !confirm('Если вы УЖЕ оплатили этот заказ — не оплачивайте повторно: статус обновится сам в течение пары минут.\n\nЕщё не оплачивали? Тогда жмите «ОК» — создадим новую ссылку на оплату.')) return;
     if (btn) { btn.disabled = true; btn.innerText = 'Создаём ссылку на оплату…'; }
     try {
         const res = await fetch('/api/orders/repay', {
@@ -322,7 +407,8 @@ async function refreshOrdersList() {
                             </div>
                         </div>
                         ${orderTrackerHTML(o.status)}
-                        ${canPay ? `<button onclick="repayOrder(${o.id}, this)" style="margin-top: 12px; width: 100%; background: linear-gradient(90deg, #ff4dff, #b300b3); border: none; color: #fff; padding: 10px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 77, 255, 0.25);">${icon('card', 'ic-in ic-white')}Оплатить</button>` : ''}
+                        ${canPay && o.pay_expires_in ? `<div class="order-pay-left">${icon('clock', 'ic-in')}На оплату осталось ~${Math.max(1, Math.ceil(o.pay_expires_in / 60))} мин</div>` : ''}
+                        ${canPay ? `<button onclick="${o.pay_token ? `openPayForOrder(${o.id}, '${o.pay_token}', this)` : `repayOrder(${o.id}, this)`}" style="margin-top: 12px; width: 100%; background: linear-gradient(90deg, #ff4dff, #b300b3); border: none; color: #fff; padding: 10px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(255, 77, 255, 0.25);">${icon('card', 'ic-in ic-white')}Оплатить</button>` : ''}
                         ${canReorder ? `<button onclick="reorderById(${o.id})" style="margin-top: 12px; width: 100%; background: transparent; border: 1px solid #ff7eb3; color: #ff7eb3; padding: 9px; border-radius: 9px; font-weight: bold; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,126,179,0.12)'" onmouseout="this.style.background='transparent'">${icon('repeat', 'ic-in')}Заказать снова</button>` : ''}
                     </div>
                 `;

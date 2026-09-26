@@ -231,23 +231,45 @@ function reorderById(id) {
 let _pay = null, _payTimer = null;
 function _rub(v) { return Number(v).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' ₽'; }
 function openPayModal(d) {
-    _pay = { id: d.order_id, token: d.pay_token, deadline: d.expires_in != null ? Date.now() + d.expires_in * 1000 : null };
+    _pay = { id: d.order_id, token: d.pay_token, methods: d.methods || [], chosen: null,
+             deadline: d.expires_in != null ? Date.now() + d.expires_in * 1000 : null };
     document.getElementById('pay-title').textContent = 'Заказ #S' + d.order_id + ' оформлен';
-    const base = (d.methods || []).find(m => !m.fee);
-    document.getElementById('pay-methods').innerHTML = (d.methods || []).map(m => {
+    const base = _pay.methods.find(m => !m.fee);
+    document.getElementById('pay-methods').innerHTML = _pay.methods.map(m => {
         const isCard = m.id === 'card';
-        const sub = isCard ? 'Visa, Mastercard, Мир' : 'Через приложение банка · без комиссии';
+        const sub = isCard ? 'Visa, Mastercard, Мир' : 'Через приложение банка';
         const extra = base && m.fee ? Math.round((m.amount - base.amount) * 100) / 100 : 0;
-        return `<button class="pay-method pm-${m.id}" onclick="payWith('${m.id}', this)">
+        const tag = m.fee
+            ? `<span class="pm-tag warn">комиссия +${m.fee}%${extra ? ' · ' + _rub(extra) : ''}</span>`
+            : '<span class="pm-tag ok">без комиссии</span>';
+        return `<button class="pay-method pm-${m.id}" data-m="${m.id}" onclick="choosePay('${m.id}')">
+                <span class="pm-check">${icon('check', 'pm-check-ic')}</span>
                 <span class="pm-ic">${icon(isCard ? 'card' : 'bolt')}</span>
-                <span class="pm-body"><b>${m.title}</b><small>${sub}</small></span>
-                <span class="pm-sum">${_rub(m.amount)}${m.fee ? `<small>+${m.fee}%</small>` : ''}</span>
-            </button>` + (m.fee ? `<div class="pm-warn">${icon('alert', 'ic-in')}Комиссия банка ${m.fee}%${extra ? ` (+${_rub(extra)})` : ''} добавлена к сумме заказа</div>` : '');
+                <span class="pm-body"><b>${m.title}</b><small>${sub}</small>${tag}</span>
+                <span class="pm-sum">${_rub(m.amount)}</span>
+            </button>`;
     }).join('');
+    choosePay(null);
     _payTick();
     clearInterval(_payTimer);
     _payTimer = setInterval(_payTick, 1000);
     showModal('pay-modal');
+}
+// Способ выбирается явно — только после этого кнопка оплаты становится активной
+function choosePay(id) {
+    if (!_pay) return;
+    _pay.chosen = id;
+    document.querySelectorAll('#pay-methods .pay-method').forEach(b => {
+        b.classList.toggle('chosen', b.dataset.m === id);
+    });
+    const go = document.getElementById('pay-go');
+    if (!go) return;
+    const m = _pay.methods.find(x => x.id === id);
+    go.disabled = !m;
+    go.classList.toggle('ready', !!m);
+    go.innerHTML = m
+        ? `Оплатить ${_rub(m.amount)} ${m.id === 'card' ? 'картой' : 'через СБП'} →`
+        : 'Выберите способ оплаты';
 }
 function _payTick() {
     const el = document.getElementById('pay-timer');
@@ -259,17 +281,22 @@ function _payTick() {
         el.classList.add('expired');
         el.innerHTML = icon('clock', 'ic-in') + 'Время на оплату вышло — заказ отменён. Оформите его заново.';
         document.querySelectorAll('#pay-methods .pay-method').forEach(b => b.disabled = true);
+        const go = document.getElementById('pay-go');
+        if (go) { go.disabled = true; go.classList.remove('ready'); go.textContent = 'Время вышло'; }
         return;
     }
     el.classList.remove('expired');
     const mm = String(Math.floor(left / 60)).padStart(2, '0'), ss = String(left % 60).padStart(2, '0');
     el.innerHTML = icon('clock', 'ic-in') + `Заказ отменится через <b>${mm}:${ss}</b>, если его не оплатить`;
 }
-async function payWith(method, btn) {
-    if (!_pay) return;
-    const all = document.querySelectorAll('#pay-methods .pay-method');
-    all.forEach(b => b.disabled = true);
-    btn.classList.add('loading');
+async function payNow(btn) {
+    if (!_pay || !_pay.chosen) return;
+    const method = _pay.chosen;
+    const tiles = document.querySelectorAll('#pay-methods .pay-method');
+    tiles.forEach(b => b.disabled = true);
+    btn.disabled = true; btn.classList.add('loading');
+    const label = btn.innerHTML;
+    btn.innerHTML = 'Создаём ссылку на оплату…';
     try {
         const res = await fetch('/api/orders/pay', {
             method: 'POST',
@@ -282,8 +309,8 @@ async function payWith(method, btn) {
     } catch (e) {
         toast('Ошибка соединения. Попробуйте ещё раз', 'error');
     }
-    btn.classList.remove('loading');
-    all.forEach(b => b.disabled = false);
+    btn.classList.remove('loading'); btn.innerHTML = label; btn.disabled = false;
+    tiles.forEach(b => b.disabled = false);
     _payTick();
 }
 // «Оплатить» в «Мои заказы» — то же окно выбора способа

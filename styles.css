@@ -1233,13 +1233,17 @@ body.low-end-mode .gi-petals { display: none; }
 }
 .pay-dot { width: 7px; height: 7px; border-radius: 50%; background: #ffd24d; animation: payPulse 1.4s ease-in-out infinite; }
 @keyframes payPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.7); } }
-.pay-card h2 { margin: 0 0 4px; font-size: 22px; }
-.pay-sub { color: #a097b0; font-size: 14px; margin: 0 0 18px; }
+.pay-card h2 { margin: 0 0 6px; font-size: 22px; }
+.pay-sub { color: #e8dff0; font-size: 14.5px; font-weight: bold; margin: 0 0 16px; }
+/* Стрелка вниз подсказывает: выбор за клиентом, сам он никуда не переходит */
+.pay-arrow { display: inline-block; color: #ff9ec6; animation: payArrow 1.6s ease-in-out infinite; }
+@keyframes payArrow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
 .pay-methods { display: flex; flex-direction: column; gap: 10px; text-align: left; }
 .pay-method {
-    display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; text-align: left;
-    border-radius: 16px; cursor: pointer; font-family: inherit; color: #fff;
-    border: 1px solid transparent;
+    position: relative; display: flex; align-items: center; gap: 14px; width: 100%;
+    padding: 14px 16px 14px 14px; border-radius: 16px; cursor: pointer; font-family: inherit;
+    color: #fff; text-align: left; border: 1px solid transparent;
     background: linear-gradient(145deg, #241c30, #181320) padding-box,
                 linear-gradient(145deg, #4a3b5d, #2a2036) border-box;
     transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
@@ -1248,42 +1252,68 @@ body.low-end-mode .gi-petals { display: none; }
     transform: translateY(-2px);
     background: linear-gradient(145deg, #2a2138, #1b1524) padding-box,
                 linear-gradient(145deg, #ff7eb3, #b300b3) border-box;
-    box-shadow: 0 8px 22px rgba(255, 126, 179, 0.25);
 }
-.pay-method:active:not(:disabled) { transform: scale(0.98); }
-.pay-method:disabled { opacity: 0.55; cursor: default; }
-.pay-method.loading { opacity: 1; }
-.pay-method.loading .pm-sum { opacity: 0.4; }
-.pay-method.loading .pm-ic { animation: payPulse 0.9s ease-in-out infinite; }
+.pay-method:active:not(:disabled) { transform: scale(0.985); }
+.pay-method:disabled { opacity: 0.5; cursor: default; }
+/* Выбранный способ: розовая рамка, галочка и подсветка */
+.pay-method.chosen {
+    background: linear-gradient(145deg, #2d2038, #1d1526) padding-box,
+                linear-gradient(145deg, #ff7eb3, #b36eff) border-box;
+    box-shadow: 0 6px 22px rgba(255, 126, 179, 0.28);
+}
+.pm-check {
+    width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%;
+    border: 2px solid #4a3b5d; display: flex; align-items: center; justify-content: center;
+    transition: 0.25s;
+}
+.pm-check .ic { width: 0; height: 0; stroke: #1b1020; stroke-width: 3; transition: 0.2s; }
+.pay-method.chosen .pm-check { background: linear-gradient(135deg, #ff9ec6, #b36eff); border-color: transparent; }
+.pay-method.chosen .pm-check .ic { width: 12px; height: 12px; }
 .pm-ic {
-    width: 46px; height: 46px; flex-shrink: 0; border-radius: 13px;
+    width: 44px; height: 44px; flex-shrink: 0; border-radius: 13px;
     display: flex; align-items: center; justify-content: center;
     background: linear-gradient(135deg, rgba(255, 126, 179, 0.2), rgba(179, 110, 255, 0.2));
     border: 1px solid rgba(255, 126, 179, 0.3);
 }
-.pm-ic .ic { width: 24px; height: 24px; }
+.pm-ic .ic { width: 23px; height: 23px; }
 .pm-body { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
 .pm-body b { font-size: 16px; }
 .pm-body small { color: #a097b0; font-size: 12px; }
-.pm-sum { display: flex; flex-direction: column; align-items: flex-end; font-weight: bold; font-size: 17px; color: #ff9ec6; white-space: nowrap; }
-.pm-sum small { font-size: 11px; color: #ffd24d; font-weight: bold; margin-top: 2px; }
-.pm-warn {
-    display: flex; align-items: center; gap: 2px; margin: -4px 4px 2px; font-size: 12px; color: #ffd24d; line-height: 1.4;
+.pm-tag {
+    margin-top: 3px; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: bold;
 }
-.pm-warn .ic { stroke: #ffd24d; }
+.pm-tag.ok { color: #4dff88; background: rgba(77, 255, 136, 0.12); }
+.pm-tag.warn { color: #ffd24d; background: rgba(255, 210, 77, 0.12); }
+.pm-sum { font-weight: bold; font-size: 17px; color: #ff9ec6; white-space: nowrap; align-self: center; }
+
+/* Главная кнопка: активна только когда способ выбран */
+.pay-go {
+    width: 100%; margin-top: 14px; padding: 14px; border: none; border-radius: 14px;
+    font-family: inherit; font-weight: bold; font-size: 15.5px; cursor: pointer; transition: 0.25s;
+    background: rgba(255, 255, 255, 0.05); color: #7c7090; cursor: not-allowed;
+}
+.pay-go.ready {
+    background: linear-gradient(90deg, #ff4dff, #b300b3); color: #fff; cursor: pointer;
+    box-shadow: 0 8px 22px rgba(179, 0, 179, 0.35);
+}
+.pay-go.ready:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(179, 0, 179, 0.5); }
+.pay-go.ready:active { transform: scale(0.98); }
+.pay-go.loading { opacity: 0.75; }
+
 .pay-timer {
-    margin-top: 16px; padding: 10px 12px; border-radius: 12px; font-size: 13px; color: #d8c3e0;
+    margin-top: 14px; padding: 10px 12px; border-radius: 12px; font-size: 13px; color: #d8c3e0;
     background: rgba(255, 255, 255, 0.03); border: 1px dashed #4a3b5d;
-    text-align: center; line-height: 1.5;   /* обычный текст: не рвётся на куски, как во flex */
+    text-align: center; line-height: 1.5;
 }
 .pay-timer:empty { display: none; }
 .pay-timer b { color: #fff; font-variant-numeric: tabular-nums; }
 .pay-timer.expired { color: #ff8080; border-color: rgba(255, 77, 77, 0.4); }
-.pay-note { color: #7c7090; font-size: 11.5px; line-height: 1.5; margin: 14px 0 0; }
+.pay-note { color: #7c7090; font-size: 11.5px; line-height: 1.5; margin: 12px 0 0; }
 .order-pay-left { margin-top: 10px; font-size: 12px; color: #ffd24d; display: flex; align-items: center; }
 .order-pay-left .ic { stroke: #ffd24d; }
 @media (max-width: 420px) {
-    .pay-method { padding: 12px; gap: 11px; }
-    .pm-ic { width: 40px; height: 40px; }
+    .pay-method { padding: 12px 12px 12px 10px; gap: 10px; }
+    .pm-ic { width: 38px; height: 38px; }
     .pm-sum { font-size: 15px; }
+    .pm-body b { font-size: 15px; }
 }

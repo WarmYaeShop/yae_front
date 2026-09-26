@@ -23,19 +23,33 @@
             img.src = target;
         }
     }
+    // Часть картинок вставлена не тегом <img>, а фоном: баннеры карусели на
+    // главной (style="background-image:url('images/banner_main.webp')") и ветка
+    // сакуры (фон из styles.css). Их тоже подменяем, иначе залитое через бота
+    // на сайте не появится.
+    function swapBg(el) {
+        var name = el.style && fnameFromSrc(el.style.backgroundImage || '');
+        if (!name) return;
+        var target = window.__imgMap[name];
+        if (target && el.dataset.bgDone !== target) {
+            el.dataset.bgDone = target;
+            el.style.backgroundImage = "url('" + target + "')";
+        }
+    }
     function sweep(root) {
         if (!root || !root.querySelectorAll) return;
         if (root.tagName === 'IMG') swap(root);
         root.querySelectorAll('img').forEach(swap);
+        swapBg(root);
+        root.querySelectorAll('[style*="images/"]').forEach(swapBg);
         applyDecor();
     }
-    // Ветка сакуры — это фон (background-image в styles.css), а не <img>,
-    // поэтому её подмену из бота («🌸 Оформление») ставим отдельно
+    // Ветка сакуры — фон из styles.css (в разметке ссылки на файл нет)
     function applyDecor() {
         var url = window.__imgMap['sakura_tree.webp'];
         var tree = document.getElementById('sakura-tree');
-        if (url && tree && tree.dataset.cdnDone !== url) {
-            tree.dataset.cdnDone = url;
+        if (url && tree && tree.dataset.bgDone !== url) {
+            tree.dataset.bgDone = url;
             tree.style.backgroundImage = "url('" + url + "')";
         }
     }
@@ -236,6 +250,7 @@ const ICON_SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hi
   <symbol id="ic-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="#1c1526"/><circle cx="15.5" cy="12" r="2" fill="#1c1526"/><circle cx="8" cy="17" r="2" fill="#1c1526"/></symbol>
   <symbol id="ic-plane" viewBox="0 0 24 24"><path d="M21 3.5L2.8 10.6l6.4 2.3zM21 3.5l-11.8 9.4.7 6.6 3.1-4.4zM21 3.5l-3.4 16-4.7-4.6"/></symbol>
   <symbol id="ic-sakura" viewBox="0 0 24 24"><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z"/><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z" transform="rotate(72 12 12)"/><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z" transform="rotate(144 12 12)"/><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z" transform="rotate(216 12 12)"/><path d="M12 11.2c-2.3-2.2-2.6-5.2-.1-7.7 2.5 2.5 2.3 5.5.1 7.7z" transform="rotate(288 12 12)"/><circle cx="12" cy="12" r="1.3"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
   <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20 20"/></symbol>
   <symbol id="ic-mail" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.8 7.2l8.2 6 8.2-6"/></symbol>
   <symbol id="ic-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2"/></symbol>
@@ -376,8 +391,9 @@ function renderHeader(isGamePage = false) {
             <button class="close-modal-btn" onclick="closeModal('pay-modal')">×</button>
             <div class="pay-status"><span class="pay-dot"></span>Ожидает оплаты</div>
             <h2 id="pay-title">Заказ оформлен</h2>
-            <p class="pay-sub">Выберите способ оплаты</p>
+            <p class="pay-sub">Остался один шаг — выберите, чем оплатить <span class="pay-arrow">↓</span></p>
             <div class="pay-methods" id="pay-methods"></div>
+            <button class="pay-go" id="pay-go" disabled onclick="payNow(this)">Выберите способ оплаты</button>
             <div class="pay-timer" id="pay-timer"></div>
             <p class="pay-note">Окно можно закрыть — оплатить получится позже в «Мои заказы».<br>Если уже оплатили — не платите повторно: статус обновится сам.</p>
         </div>

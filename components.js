@@ -661,6 +661,8 @@ function renderFooter() {
             <a href="/offer" style="color: #a097b0; font-size: 13px; text-decoration: underline;">Публичная оферта</a>
             &nbsp;·&nbsp;
             <a href="/privacy" style="color: #a097b0; font-size: 13px; text-decoration: underline;">Политика конфиденциальности</a>
+            &nbsp;·&nbsp;
+            <a href="/terms" style="color: #a097b0; font-size: 13px; text-decoration: underline;">Пользовательское соглашение</a>
         </div>
         <div class="footer-copy" style="margin-bottom: 6px; line-height: 1.7;">ОсОО «Глобал Бридж» · ОГРН 309678-3301-ООО · ИНН 9909704508<br>Кыргызская Республика, г. Бишкек, Октябрьский район, ул. Юнусалиева 185/1<br>${icon('mail', 'ic-in')}donatebyyaemiko@gmail.com</div>
         <div class="footer-copy">© 2021-2026 Yae Shop. Все права защищены.</div>

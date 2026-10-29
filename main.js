@@ -236,8 +236,13 @@ function openPayModal(d) {
     document.getElementById('pay-title').textContent = 'Заказ #S' + d.order_id + ' оформлен';
     const base = _pay.methods.find(m => !m.fee);
     document.getElementById('pay-methods').innerHTML = _pay.methods.map(m => {
-        const isCard = m.id === 'card';
-        const sub = isCard ? 'Visa, Mastercard, Мир' : 'Через приложение банка';
+        // kind — что это за способ (sbp / card / sberpay), provider — чья касса.
+        // Старый сервер kind не присылает — тогда угадываем по id, как раньше.
+        const kind = m.kind || (m.id === 'card' ? 'card' : 'sbp');
+        const isCard = kind === 'card';
+        const backup = m.provider === 'platega' && kind !== 'sberpay';
+        const sub = (isCard ? 'Visa, Mastercard, Мир' : kind === 'sberpay' ? 'Через СберБанк Онлайн' : 'Через приложение банка')
+            + (backup ? ' · если основной не проходит' : '');
         const extra = base && m.fee ? Math.round((m.amount - base.amount) * 100) / 100 : 0;
         const tag = m.fee
             ? `<span class="pm-tag warn">комиссия +${m.fee}%${extra ? ' · ' + _rub(extra) : ''}</span>`
@@ -256,6 +261,10 @@ function openPayModal(d) {
     showModal('pay-modal');
 }
 // Способ выбирается явно — только после этого кнопка оплаты становится активной
+function _payVerb(m) {
+    const kind = m.kind || (m.id === 'card' ? 'card' : 'sbp');
+    return kind === 'card' ? 'картой' : kind === 'sberpay' ? 'через SberPay' : 'через СБП';
+}
 function choosePay(id) {
     if (!_pay) return;
     _pay.chosen = id;
@@ -268,7 +277,7 @@ function choosePay(id) {
     go.disabled = !m;
     go.classList.toggle('ready', !!m);
     go.innerHTML = m
-        ? `Оплатить ${_rub(m.amount)} ${m.id === 'card' ? 'картой' : 'через СБП'} →`
+        ? `Оплатить ${_rub(m.amount)} ${_payVerb(m)} →`
         : 'Выберите способ оплаты';
 }
 function _payTick() {

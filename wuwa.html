@@ -162,6 +162,10 @@
     </div>
     
     <div id="login-extra-fields" style="margin-top: 15px; text-align: left;">
+        <div class="input-field" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
+            <label>Сервер</label>
+            <select id="login-server" style="width: 100%; box-sizing: border-box;"><option value="" disabled selected>Выберите сервер</option><option>Asia</option><option>Europe</option><option>America</option><option>SEA</option><option>HMT</option></select>
+        </div>
         
         <div class="input-field" style="width: 100%; box-sizing: border-box; margin-bottom: 15px;">
             <label>Когда удобно передать код?</label>
@@ -468,6 +472,8 @@
                 loginEmail = (document.getElementById('login-input')?.value || '').trim();
                 loginPassword = (document.getElementById('password-input')?.value || '').trim();
                 if (!loginEmail || !loginPassword) { alert("Пожалуйста, укажите логин и пароль!"); return; }
+                userServer = document.getElementById('login-server')?.value || '';
+                if (!userServer) { alert("Пожалуйста, выберите сервер!"); document.getElementById('login-server')?.focus(); return; }
                 codeTime = document.getElementById('code-time-input') ? document.getElementById('code-time-input').value : "";
                 isUrgent = document.getElementById('urgent-checkbox') ? document.getElementById('urgent-checkbox').checked : false;
             } else {
